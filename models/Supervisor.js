@@ -24,6 +24,8 @@ const SupervisorSchema = new mongoose.Schema({
             student: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Student',
+                email: mongoose.Schema.Types.String,
+                username : mongoose.Schema.Types.String
             },
             status: {
                 type: String,
