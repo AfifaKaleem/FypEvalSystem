@@ -67,17 +67,18 @@ app.use(logRequest);
 //import router files 
 const LoginSignupRoutes = require('./routes/LoginSignUpRoutes');
 const fypHeadRoutes = require('./routes/FypRoutes');
+const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
 // const studentRoutes = require('./routes/StudentRoutes');
 // const supervisorRoutes = require('./routes/SupervisorRoutes');
 
-// Routes
-app.use('/fyphead', fypHeadRoutes);
 // app.use('/student', studentRoutes);
 // app.use('/supervisor', supervisorRoutes);
 
 
 //use the routes
 app.use('/loginsignup',LoginSignupRoutes);
+app.use('/fyphead', fypHeadRoutes);
+app.use('/evaluator', EvaluatorRoutes);
 
 
 //load the env file
