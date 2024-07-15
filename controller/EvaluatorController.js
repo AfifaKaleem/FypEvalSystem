@@ -1,6 +1,6 @@
 // controllers/evaluatorController.js
-const Evaluator = require('../models/Evaluator');
-const Student = require('../models/Student');
+const Evaluator = require('./../models/Evaluator');
+const Student = require('./../models/Student');
 
 // Create Evaluator
 exports.addEvaluator = async (req, res) => {

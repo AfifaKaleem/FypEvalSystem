@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const cors = require('cors');
-const evaluatorController = require('../controllers/evaluatorController');
+const evaluatorController = require('./../controller/EvaluatorController');
 
 // Create Evaluator
 router.post('/add-evaluator', cors(), evaluatorController.addEvaluator);

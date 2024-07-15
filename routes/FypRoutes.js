@@ -1,7 +1,7 @@
 // routes/fypHeadRoutes.js
 const express = require('express');
 const router = express.Router();
-const fypHeadController = require('../controllers/fypHeadController');
+const fypHeadController = require('./../controllers/fypHeadController');
 const cors = require('cors');
 
 

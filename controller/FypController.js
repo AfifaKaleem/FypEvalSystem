@@ -1,7 +1,7 @@
 // controllers/fypHeadController.js
-const FYPHead = require('../models/FypHead');
-const Supervisor = require('../models/Supervisor');
-const Student = require('../models/Student');
+const FYPHead = require('./../models/FypHead');
+const Supervisor = require('./../models/Supervisor');
+const Student = require('./../models/Student');
 
 // Create Supervisor
 exports.addSupervisor = async (req, res) => {
