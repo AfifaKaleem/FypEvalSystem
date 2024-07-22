@@ -3,8 +3,32 @@ const FYPHead = require('./../models/FypHead');
 const Supervisor = require('./../models/Supervisor');
 const Student = require('./../models/Student');
 
+
+// Route to check access that student is eligible to access fyp system
+router.get('/access', async (req, res) => {
+    const { studentId } = req.query;
+  
+    try {
+      const student = await Student.findOne({ studentId });
+  
+      if (!student) {
+        return res.status(404).send('Student not found');
+      }
+  
+      if (student.isEligible) {
+        return res.status(200).send('Student is eligible to access FYP system');
+      } else {
+        return res.status(403).send('Student is not eligible to access FYP system');
+      }
+    } catch (error) {
+      res.status(500).send('Internal server error');
+    }
+  });
+
+
+
 // Create Supervisor
-exports.addSupervisor = async (req, res) => {
+module.exports.addSupervisor = async (req, res) => {
     try {
         const { username, email, domain, office } = req.body;
         const newSupervisor = new Supervisor({ username, email, domain, office });
@@ -18,7 +42,7 @@ exports.addSupervisor = async (req, res) => {
 };
 
 // Get Supervisors
-exports.getSupervisors = async (req, res) => {
+module.exports.getSupervisors = async (req, res) => {
     try {
         const data = await Supervisor.find().select('email username domain office');
         console.log('Supervisors data fetched');
@@ -30,7 +54,7 @@ exports.getSupervisors = async (req, res) => {
 };
 
 // Update Supervisor
-exports.updateSupervisor = async (req, res) => {
+module.exports.updateSupervisor = async (req, res) => {
     try {
         const supervisorId = req.params.id;
         const updatedSupervisorData = req.body;
@@ -53,7 +77,7 @@ exports.updateSupervisor = async (req, res) => {
 };
 
 // Delete Supervisor
-exports.deleteSupervisor = async (req, res) => {
+module.exports.deleteSupervisor = async (req, res) => {
     try {
         const supervisorId = req.params.id;
 
@@ -72,7 +96,7 @@ exports.deleteSupervisor = async (req, res) => {
 };
 
 // Create Student
-exports.addStudent = async (req, res) => {
+module.exports.addStudent = async (req, res) => {
     try {
         const { username, email, credit_hours, semester, department } = req.body;
         const newStudent = new Student({ username, email, credit_hours, semester, department });
@@ -86,7 +110,7 @@ exports.addStudent = async (req, res) => {
 };
 
 // Get Students
-exports.getStudents = async (req, res) => {
+module.exports.getStudents = async (req, res) => {
     try {
         const data = await Student.find().select('username email credit_hours semester department');
         console.log('Students data fetched');
@@ -98,7 +122,7 @@ exports.getStudents = async (req, res) => {
 };
 
 // Update Student
-exports.updateStudent = async (req, res) => {
+module.exports.updateStudent = async (req, res) => {
     try {
         const studentId = req.params.id;
         const updatedStudentData = req.body;
@@ -121,7 +145,7 @@ exports.updateStudent = async (req, res) => {
 };
 
 // Delete Student
-exports.deleteStudent = async (req, res) => {
+module.exports.deleteStudent = async (req, res) => {
     try {
         const studentId = req.params.id;
 
@@ -140,7 +164,7 @@ exports.deleteStudent = async (req, res) => {
 };
 
 // Student requests a supervisor
-exports.requestSupervisor = async (req, res) => {
+module.exports.requestSupervisor = async (req, res) => {
     const { studentId, studentName, supervisorName, supervisorId } = req.body;
     try {
         const student = await Student.findById(studentId);
@@ -163,7 +187,7 @@ exports.requestSupervisor = async (req, res) => {
 };
 
 // Get supervisor request status
-exports.getRequestStatus = async (req, res) => {
+module.exports.getRequestStatus = async (req, res) => {
     try {
         const student = await Student.findById(req.params.studentId).populate({
             path: 'supervisorRequest.supervisor',
@@ -180,7 +204,7 @@ exports.getRequestStatus = async (req, res) => {
 };
 
 // Get supervisor's student requests
-exports.getSupervisorRequests = async (req, res) => {
+module.exports.getSupervisorRequests = async (req, res) => {
     try {
         const supervisor = await Supervisor.findById(req.params.supervisorId).populate({
             path: 'studentRequests.student',
@@ -196,8 +220,22 @@ exports.getSupervisorRequests = async (req, res) => {
     }
 };
 
+module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {
+    try {
+      const supervisor = await Supervisor.findById(req.params.id).populate('email username');
+      if (!supervisor) {
+        return res.status(404).send({ error: 'Supervisor not found' });
+      }
+      const students = await Student.find({ supervisor: req.params.id }).populate('email username');
+      res.json({ supervisor, students });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send({ error: 'Internal server error' });
+    }
+  };
+
 // Get list of accepted supervisor-student pairs
-exports.getAcceptedRequests = async (req, res) => {
+module.exports.getAcceptedRequests = async (req, res) => {
     try {
         const students = await Student.find({ 'supervisorRequest.status': 'accepted' }).populate({
             path: 'supervisorRequest.supervisor',
@@ -223,7 +261,7 @@ exports.getAcceptedRequests = async (req, res) => {
 };
 
 // Get list of rejected supervisor-student pairs
-exports.getRejectedRequests = async (req, res) => {
+module.exports.getRejectedRequests = async (req, res) => {
     try {
         const students = await Student.find({ 'supervisorRequest.status': 'rejected' }).populate({
             path: 'supervisorRequest.supervisor',
@@ -249,7 +287,7 @@ exports.getRejectedRequests = async (req, res) => {
 };
 
 // Get list of pending supervisor-student pairs
-exports.getPendingRequests = async (req, res) => {
+module.exports.getPendingRequests = async (req, res) => {
     try {
         const students = await Student.find({ 'supervisorRequest.status': 'pending' }).populate({
             path: 'supervisorRequest.supervisor',
@@ -278,7 +316,7 @@ exports.getPendingRequests = async (req, res) => {
 };
 
 // Supervisor responds to a student request
-exports.respondRequest = async (req, res) => {
+module.exports.respondRequest = async (req, res) => {
     const { supervisorId, studentId, response } = req.body;
 
     try {
@@ -320,3 +358,4 @@ exports.respondRequest = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+

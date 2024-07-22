@@ -3,7 +3,7 @@ const Evaluator = require('./../models/Evaluator');
 const Student = require('./../models/Student');
 
 // Create Evaluator
-exports.addEvaluator = async (req, res) => {
+module.exports.addEvaluator = async (req, res) => {
     try {
         const { username, email, office } = req.body;
         const newEvaluator = new Evaluator({ username, email, office });
@@ -17,7 +17,7 @@ exports.addEvaluator = async (req, res) => {
 };
 
 // Get Evaluators
-exports.getEvaluators = async (req, res) => {
+module.exports.getEvaluators = async (req, res) => {
     try {
         const data = await Evaluator.find().select('email username office');
         console.log('Evaluator data fetched');
@@ -29,7 +29,7 @@ exports.getEvaluators = async (req, res) => {
 };
 
 // Update Evaluator
-exports.updateEvaluator = async (req, res) => {
+module.exports.updateEvaluator = async (req, res) => {
     try {
         const evaluatorId = req.params.id;
         const updatedEvaluatorData = req.body;
@@ -52,7 +52,7 @@ exports.updateEvaluator = async (req, res) => {
 };
 
 // Delete Evaluator
-exports.deleteEvaluator = async (req, res) => {
+module.exports.deleteEvaluator = async (req, res) => {
     try {
         const evaluatorId = req.params.id;
 
@@ -71,7 +71,7 @@ exports.deleteEvaluator = async (req, res) => {
 };
 
 // Assign Evaluator to Student
-exports.assignEvaluator = async (req, res) => {
+module.exports.assignEvaluator = async (req, res) => {
     const { evaluatorId, studentId } = req.body;
 
     try {

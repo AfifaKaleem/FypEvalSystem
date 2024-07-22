@@ -68,6 +68,7 @@ app.use(logRequest);
 const LoginSignupRoutes = require('./routes/LoginSignUpRoutes');
 const fypHeadRoutes = require('./routes/FypRoutes');
 const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
+const DiscussionRoutes = require('./routes/DiscussionRoutes')
 // const studentRoutes = require('./routes/StudentRoutes');
 // const supervisorRoutes = require('./routes/SupervisorRoutes');
 
@@ -79,7 +80,7 @@ const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
 app.use('/loginsignup',LoginSignupRoutes);
 app.use('/fyphead', fypHeadRoutes);
 app.use('/evaluator', EvaluatorRoutes);
-
+app.use('/discussion',DiscussionRoutes);
 
 //load the env file
 const port = process.env.PORT||8080;

@@ -21,6 +21,7 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    isEligible: { type: Boolean, default: false },
     supervisorRequest: {
         supervisor: {
             type: mongoose.Schema.Types.ObjectId,
@@ -35,6 +36,29 @@ const StudentSchema = new mongoose.Schema({
         }
     }
 });
+
+// Middleware to check eligibility
+StudentSchema.pre('save', function(next) {
+    if (this.credit_hours >= 91 && this.semester >= 6) {
+      this.isEligible = true;
+    }else {
+      this.isEligible = false;
+    }
+
+    if(this.credit_hours >=107 && this.semester >=7){
+        this.isEligible = true;
+    }else{
+        this.isEligible = false;
+    }
+
+    if(this.credit_hours >=122 || this.credit_hours <130 && this.semester >=8){
+        this.isEligible = true;
+    }else{
+        this.isEligible = false;
+    }
+    
+    next();
+  });
 
 const Student = mongoose.model('Student', StudentSchema);
 

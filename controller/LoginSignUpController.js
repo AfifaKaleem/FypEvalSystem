@@ -3,7 +3,7 @@ const LoginSignup = require('./../models/LoginSignup');
 const { jwtAuthMiddleware, generateToken } = require('./../jwt');
 
 // Signup
-exports.signup = async (req, res) => {
+module.exports.signup = async (req, res) => {
     try {
         const data = req.body;
         const newLoginSignup = new LoginSignup(data);
@@ -28,7 +28,7 @@ exports.signup = async (req, res) => {
 };
 
 // Login
-exports.login = async (req, res) => {
+module.exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await LoginSignup.findOne({ email });
@@ -52,7 +52,7 @@ exports.login = async (req, res) => {
 };
 
 // Logout
-exports.logout = async (req, res) => {
+module.exports.logout = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await LoginSignup.findOne({ email });
@@ -72,7 +72,7 @@ exports.logout = async (req, res) => {
 };
 
 // Get all users
-exports.getAllUsers = async (req, res) => {
+module.exports.getAllUsers = async (req, res) => {
     try {
         const users = await LoginSignup.find();
         console.log('Data fetched');
@@ -84,7 +84,7 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // Get user profile
-exports.getProfile = async (req, res) => {
+module.exports.getProfile = async (req, res) => {
     try {
         const userData = req.user;
         console.log("User Data", userData);
@@ -100,7 +100,7 @@ exports.getProfile = async (req, res) => {
 };
 
 // Update user
-exports.updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res) => {
     try {
         const userId = req.params.id;
         const updatedUserData = req.body;
@@ -123,7 +123,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Update user password
-exports.updatePassword = async (req, res) => {
+module.exports.updatePassword = async (req, res) => {
     try {
         const userId = req.params.id;
         const { password } = req.body;
@@ -145,7 +145,7 @@ exports.updatePassword = async (req, res) => {
 };
 
 // Delete user
-exports.deleteUser = async (req, res) => {
+module.exports.deleteUser = async (req, res) => {
     try {
         const userId = req.params.id;
         const response = await LoginSignup.findByIdAndDelete(userId);

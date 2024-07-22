@@ -1,7 +1,7 @@
 // routes/loginSignupRoutes.js
 const express = require('express');
 const router = express.Router();
-const loginSignupController = require('./../controllers/loginSignupController');
+const loginSignupController = require('./../controller/LoginSignUpController');
 const { jwtAuthMiddleware } = require('./../jwt');
 
 router.post('/signup', loginSignupController.signup);

@@ -1,8 +1,9 @@
 // routes/fypHeadRoutes.js
 const express = require('express');
 const router = express.Router();
-const fypHeadController = require('./../controllers/fypHeadController');
+const fypHeadController = require('./../controller/FypController');
 const cors = require('cors');
+
 
 
 router.post('/add-supervisor', cors(), fypHeadController.addSupervisor);      //create supervisor
@@ -23,5 +24,6 @@ router.get('/accepted-requests', cors(), fypHeadController.getAcceptedRequests);
 router.get('/rejected-requests', cors(), fypHeadController.getRejectedRequests);  //list of rejected list of students
 router.get('/pending-requests', cors(), fypHeadController.getPendingRequests);  //list of pending request of students
 router.post('/respond-request', cors(), fypHeadController.respondRequest);  // supervisor respond to student request
+router.get('/getSpecificSupervisorAlongStudents/:id',cors(),fypHeadController.getSpecificSupervisorAlongStudents); 
 
 module.exports = router;
