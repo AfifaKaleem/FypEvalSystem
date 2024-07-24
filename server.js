@@ -9,7 +9,7 @@ const LoginSignup = require('./models/LoginSignup');
 const cors = require('cors');
 
 
-const allowedOrigins = [' http://localhost:3000 ', ' http://192.168.18.30:3000 '];
+const allowedOrigins = [' http://localhost:3000 ', ' http://192.168.18.30:3000'];
 const multiCorsOptions = {
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
@@ -19,7 +19,7 @@ const multiCorsOptions = {
       }
     }
   };
-app.use(cors(multiCorsOptions));
+app.use(cors());
 // const Fyp = require('./models/Fyp');
 
 

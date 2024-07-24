@@ -37,6 +37,13 @@ const StudentSchema = new mongoose.Schema({
     }
 });
 
+var proposalSchema = new mongoose.Schema({
+    fileName: {type: String, default: ''},
+    submittedBy: String,
+    status: {type: String, default: ''},
+    remarks: {type: String, default: ''}
+});
+
 // Middleware to check eligibility
 StudentSchema.pre('save', function(next) {
     if (this.credit_hours >= 91 && this.semester >= 6) {
@@ -61,5 +68,7 @@ StudentSchema.pre('save', function(next) {
   });
 
 const Student = mongoose.model('Student', StudentSchema);
+const proposal = mongoose.model('proposal', proposalSchema);
 
-module.exports = Student;
+module.exports = {
+    Student,proposal}

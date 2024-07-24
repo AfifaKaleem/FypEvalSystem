@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 const LoginSignUpSchema = new mongoose.Schema({
     username :{
         type: String,
-        required : true,
         minlength: 3,
         maxlength: 16,
         unique: true

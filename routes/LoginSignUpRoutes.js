@@ -3,17 +3,20 @@ const express = require('express');
 const router = express.Router();
 const loginSignupController = require('./../controller/LoginSignUpController');
 const { jwtAuthMiddleware } = require('./../jwt');
+const cors = require('cors');
+router.post('/signup', cors(), loginSignupController.signup);
+router.post('/login', cors(),loginSignupController.login);
+router.post('/logout', cors(), loginSignupController.logout);
 
-router.post('/signup', loginSignupController.signup);
-router.post('/login', loginSignupController.login);
-router.post('/logout', loginSignupController.logout);
+router.get('/',  cors(),loginSignupController.getAllUsers);
+router.get('/login',  cors(),loginSignupController.getLoginusersData);
+router.get('/logout', cors(),loginSignupController.getLogoutusersData);
 
-router.get('/', loginSignupController.getAllUsers);
-router.get('/profile', jwtAuthMiddleware, loginSignupController.getProfile);
+router.get('/profile', cors(), jwtAuthMiddleware, loginSignupController.getProfile);
 
-router.put('/:id', loginSignupController.updateUser);
-router.put('/:id/password', loginSignupController.updatePassword);
+router.put('/:id',  cors(),loginSignupController.updateUser);
+router.put('/:id/password',  cors(),loginSignupController.updatePassword);
 
-router.delete('/:id', loginSignupController.deleteUser);
+router.delete('/:id', cors(), loginSignupController.deleteUser);
 
 module.exports = router;

@@ -2,6 +2,10 @@
 const LoginSignup = require('./../models/LoginSignup');
 const { jwtAuthMiddleware, generateToken } = require('./../jwt');
 
+
+const loggedInUsers = [];
+const SignedUpUsers = [];
+const LoggedOutUsers =[];
 // Signup
 module.exports.signup = async (req, res) => {
     try {
@@ -16,6 +20,8 @@ module.exports.signup = async (req, res) => {
             email: response.email,
             password: response.password
         };
+        // Add user to signed up users list
+        SignedUpUsers.push({ username: data.username, email: data.email, password: data.password });
         console.log(JSON.stringify(payload));
         const token = generateToken(response.username);
         console.log("Token is", token);
@@ -43,6 +49,8 @@ module.exports.login = async (req, res) => {
             password: user.password
         };
         const token = generateToken(payload);
+         // Add user to logged-in users list
+         loggedInUsers.push({ email: user.email, password: user.password });
 
         res.json({ token, email: email, payload: payload });
     } catch (err) {
@@ -60,7 +68,8 @@ module.exports.logout = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-
+         // save user list who have logged out
+        LoggedOutUsers.push({ email: user.email, password: user.password });
         user.loggedIn = false;
         await user.save();
         res.json({ message: 'Logged out successfully', user: user });
@@ -71,7 +80,7 @@ module.exports.logout = async (req, res) => {
     }
 };
 
-// Get all users
+// Get all users signup data
 module.exports.getAllUsers = async (req, res) => {
     try {
         const users = await LoginSignup.find();
@@ -82,6 +91,31 @@ module.exports.getAllUsers = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+//get all users login data
+module.exports.getLoginusersData = async(req,res)=>{
+    try {
+        if (loggedInUsers.length === 0) {
+            return res.status(404).json({ error: 'No logged-in users found' });
+        }
+        res.status(200).json(loggedInUsers);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+//get all users logg out data
+module.exports.getLogoutusersData = async(req,res)=>{
+    try {
+        if (LoggedOutUsers.length === 0) {
+            return res.status(404).json({ error: 'No logged-out users found' });
+        }
+        res.status(200).json(LoggedOutUsers);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 // Get user profile
 module.exports.getProfile = async (req, res) => {

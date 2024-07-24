@@ -5,7 +5,7 @@ const Student = require('./../models/Student');
 
 
 // Route to check access that student is eligible to access fyp system
-router.get('/access', async (req, res) => {
+module.exports.getStudentAccess = async (req, res) => {
     const { studentId } = req.query;
   
     try {
@@ -23,7 +23,7 @@ router.get('/access', async (req, res) => {
     } catch (error) {
       res.status(500).send('Internal server error');
     }
-  });
+  };
 
 
 
