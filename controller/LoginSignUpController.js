@@ -81,17 +81,29 @@ module.exports.logout = async (req, res) => {
 };
 
 // Get all users signup data
-module.exports.getAllUsers = async (req, res) => {
+// module.exports.getAllUsers = async (req, res) => {
+//     try {
+//         const users = await LoginSignup.find();
+//         console.log('Data fetched');
+//         res.status(200).json(users);
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// };
+
+
+module.exports.getAllUsers = async(req,res)=>{
     try {
-        const users = await LoginSignup.find();
-        console.log('Data fetched');
-        res.status(200).json(users);
+        if (SignedUpUsers.length === 0) {
+            return res.status(404).json({ error: 'No lSignedUp users found' });
+        }
+        res.status(200).json(SignedUpUsers);
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal server error' });
     }
-};
-
+}
 //get all users login data
 module.exports.getLoginusersData = async(req,res)=>{
     try {

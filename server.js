@@ -9,14 +9,14 @@ const LoginSignup = require('./models/LoginSignup');
 const cors = require('cors');
 
 
-const allowedOrigins = [' http://localhost:3000 ', ' http://192.168.18.30:3000'];
+const allowedOrigins = ['http://localhost:3000', 'http://192.168.18.30:3000'];
 const multiCorsOptions = {
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
-      }
+      } 
     }
   };
 app.use(cors());
