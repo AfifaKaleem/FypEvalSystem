@@ -18,8 +18,15 @@
     "express-validator": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.4",
-    "nodemon": "^3.1.4",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "netlify-cli": "^17.35.0",
+    "netlify-lambda": "^2.0.16",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }

@@ -70,39 +70,49 @@ module.exports.deleteEvaluator = async (req, res) => {
     }
 };
 
-// Assign Evaluator to Student
+//assign evaluator to students
 module.exports.assignEvaluator = async (req, res) => {
-    const { evaluatorId, studentId } = req.body;
-
     try {
+        const { studentId, evaluatorId } = req.body;
+
+        // Find the evaluator and student
         const evaluator = await Evaluator.findById(evaluatorId);
-        if (!evaluator) {
-            return res.status(404).json({ msg: 'Evaluator not found' });
-        }
-
-        // Check if the evaluator already has 8 assigned students
-        const assignedStudentsCount = await Student.countDocuments({
-            'evaluator': evaluatorId
-        });
-
-        if (assignedStudentsCount >= 8) {
-            return res.status(400).json({ msg: 'Evaluator has already been assigned 8 students' });
-        }
-
         const student = await Student.findById(studentId);
-        if (!student) {
-            return res.status(404).json({ msg: 'Student not found' });
+
+        if (!evaluator || !student) {
+            return res.status(404).json({ message: 'Evaluator or Student not found' });
         }
 
+        // Check if the evaluator already has 8 students
+        if (evaluator.students.length >= 8) {
+            return res.status(400).json({ message: 'Evaluator already has 8 students assigned' });
+        }
+
+        // Assign the evaluator to the student
         student.evaluator = evaluatorId;
         await student.save();
 
-        evaluator.studentAssignments.push(studentId);
+        // Add the student to the evaluator's list
+        evaluator.students.push(studentId);
         await evaluator.save();
 
-        res.status(200).json(evaluator);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(200).json({ message: 'Evaluator assigned to student successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error });
     }
 };
+
+
+module.exports.getSpecificEvaluatorAlongStudents = async (req, res) => {
+    try {
+      const evaluator = await Evaluator.findById(req.params.id).populate('email username');
+      if (!evaluator) {
+        return res.status(404).send({ error: 'Evaluator not found' });
+      }
+      const students = await Student.find({ evaluator: req.params.id }).populate('email username');
+      res.json({ evaluator, students });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send({ error: 'Internal server error' });
+    }
+  }

@@ -1,12 +1,23 @@
 require('dotenv').config();
 
 const express = require('express')
+
 const app = express();
 const bodyParser = require('body-parser');
+const serverless = require('serverless-http');
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 const db = require('./db');
 const LoginSignup = require('./models/LoginSignup');
+const Announcement = require('./models/Annoucement');
 const cors = require('cors');
+const morgan = require('morgan');
+
+const path = require('path');
+
+
+// app.set("view engine","ejs")
+// app.set("views".path.resolve(__dirname,"views/ejs"))
 
 
 const allowedOrigins = ['http://localhost:3000', 'http://192.168.18.30:3000'];
@@ -20,9 +31,9 @@ const multiCorsOptions = {
     }
   };
 app.use(cors());
+
+// app.use(morgan('tiny'));
 // const Fyp = require('./models/Fyp');
-
-
 
 const passport = require('passport');
 //username and password based  designed for authenticaion
@@ -68,7 +79,8 @@ app.use(logRequest);
 const LoginSignupRoutes = require('./routes/LoginSignUpRoutes');
 const fypHeadRoutes = require('./routes/FypRoutes');
 const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
-const DiscussionRoutes = require('./routes/DiscussionRoutes')
+const DiscussionRoutes = require('./routes/DiscussionRoutes');
+const AnnouncementRoutes = require('./routes/AnnouncementRoutes');
 // const studentRoutes = require('./routes/StudentRoutes');
 // const supervisorRoutes = require('./routes/SupervisorRoutes');
 
@@ -81,6 +93,8 @@ app.use('/loginsignup',LoginSignupRoutes);
 app.use('/fyphead', fypHeadRoutes);
 app.use('/evaluator', EvaluatorRoutes);
 app.use('/discussion',DiscussionRoutes);
+app.use('/announcement',AnnouncementRoutes);
+
 
 //load the env file
 const port = process.env.PORT||8080;

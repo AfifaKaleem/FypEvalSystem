@@ -21,6 +21,7 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    evaluator: { type: mongoose.Schema.Types.ObjectId, ref: 'Evaluator' },
     isEligible: { type: Boolean, default: false },
     supervisorRequest: {
         supervisor: {
@@ -37,12 +38,7 @@ const StudentSchema = new mongoose.Schema({
     }
 });
 
-var proposalSchema = new mongoose.Schema({
-    fileName: {type: String, default: ''},
-    submittedBy: String,
-    status: {type: String, default: ''},
-    remarks: {type: String, default: ''}
-});
+
 
 // Middleware to check eligibility
 StudentSchema.pre('save', function(next) {
@@ -68,7 +64,6 @@ StudentSchema.pre('save', function(next) {
   });
 
 const Student = mongoose.model('Student', StudentSchema);
-const proposal = mongoose.model('proposal', proposalSchema);
+// const proposal = mongoose.model('proposal', proposalSchema);
 
-module.exports = {
-    Student,proposal}
+module.exports = Student;

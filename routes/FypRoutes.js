@@ -6,6 +6,8 @@ const cors = require('cors');
 
 
 router.get('/studentaccess/:id', cors(),fypHeadController.getStudentAccess);
+router.get('/supervisoraccess/:id',cors(),fypHeadController.getSupervisorAccess);
+// router.get('/showaccessstatus/:id', cors(), fypHeadController.getAccessStatus);
 router.post('/add-supervisor', cors(), fypHeadController.addSupervisor);      //create supervisor
 router.get('/supervisors', cors(), fypHeadController.getSupervisors);         //get supervisors list
 router.put('/supervisor/:id', cors(), fypHeadController.updateSupervisor);    //update supervsior id

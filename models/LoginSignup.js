@@ -14,7 +14,7 @@ const LoginSignUpSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/(.*@student\.uol\.edu\.pk$|.*@faculty\.uol\.edu\.pk$|.*@admin\.uol\.edu\.pk$)/, 'Invalid email domain']
+        match: [/(.*@student\.uol\.edu\.pk$|.*@faculty\.uol\.edu\.pk$|.*@admin\.uol\.edu\.pk$)/, 'Invalid email domain'],
     },
     password: {
         type:String,
@@ -82,4 +82,7 @@ LoginSignUpSchema.methods.comparePassword  = async function(candidatePassword){
 //create LoginSignup model
 const LoginSignup = mongoose.model('LoginSignup', LoginSignUpSchema);
 module.exports = LoginSignup;
+
+
+
 

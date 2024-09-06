@@ -1,6 +1,6 @@
 // controllers/loginSignupController.js
 const LoginSignup = require('./../models/LoginSignup');
-const { jwtAuthMiddleware, generateToken } = require('./../jwt');
+const { generateToken } = require('./../jwt');
 
 
 const loggedInUsers = [];
@@ -80,17 +80,48 @@ module.exports.logout = async (req, res) => {
     }
 };
 
-// Get all users signup data
-// module.exports.getAllUsers = async (req, res) => {
-//     try {
-//         const users = await LoginSignup.find();
-//         console.log('Data fetched');
-//         res.status(200).json(users);
-//     } catch (err) {
-//         console.log(err);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// };
+//Get all users signup data
+module.exports.getAllData = async (req, res) => {
+    try {
+        const users = await LoginSignup.find();
+        console.log('Data fetched');
+        res.status(200).json(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+module.exports.getAll = async (req, res) => {
+    try {
+        // Fetch only username and email from all users
+        const users = await LoginSignup.find({}, 'username email');
+        console.log('Data fetched');
+        
+        res.status(200).json(users); // Return the array of users with username and email
+        console.log(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+module.exports.getUserPassword = async (req, res) => {
+    try {
+        const user = await LoginSignup.findOne({ username: req.params.username });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('Actual Password:', user.password);
+        res.status(200).json({ username: user.username, email: user.email, password: user.password });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 
 module.exports.getAllUsers = async(req,res)=>{

@@ -11,6 +11,8 @@ router.post('/logout', cors(), loginSignupController.logout);
 router.get('/',  cors(),loginSignupController.getAllUsers);
 router.get('/login',  cors(),loginSignupController.getLoginusersData);
 router.get('/logout', cors(),loginSignupController.getLogoutusersData);
+router.get('/details',cors(),loginSignupController.getAllData);
+router.get('/DetailUser',cors(),loginSignupController.getAll);
 
 router.get('/profile', cors(), jwtAuthMiddleware, loginSignupController.getProfile);
 

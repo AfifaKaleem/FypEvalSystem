@@ -19,4 +19,5 @@ router.delete('/evaluator/:id', cors(), evaluatorController.deleteEvaluator);
 // Assign Evaluator to Student
 router.post('/assign-evaluator', cors(), evaluatorController.assignEvaluator);
 
+router.get('/getSpecificEvaluatorAlongStudents/:id', cors(),evaluatorController.getSpecificEvaluatorAlongStudents)
 module.exports = router;

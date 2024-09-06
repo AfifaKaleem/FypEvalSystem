@@ -14,8 +14,7 @@ module.exports.getStudentAccess = async (req, res) => {
       if (!student) {
         return res.status(404).send('Student not found');
       }
-  
-      if (student.isEligible) {
+      if (student.isEligible && student.email.endsWith("@student.uol.edu,pk")) {
         return res.status(200).send('Student is eligible to access FYP system');
       } else {
         return res.status(403).send('Student is not eligible to access FYP system');
@@ -24,7 +23,41 @@ module.exports.getStudentAccess = async (req, res) => {
       res.status(500).send('Internal server error');
     }
   };
+module.exports.getSupervisorAccess = async(req,res)=>{
+    const {supervisorId} = req.query;
+    try{
+        const supervisor = await Supervisor.findOne({supervisorId});
+        if(!supervisor){
+            return res.status(404).send("Supervisor not found");
+        }
+        if(supervisor.email.endsWith('@faculty.uol.edu.pk')){
+            return res.status(200).json("Supervisor is Eligible to access Fyp System");
+        }else{
+            return res.status(403).send("Supervisor is not Eligible to access the Fyp System");
+        }
 
+    }catch(err){
+        console.log(err);
+        res.status(500).json({error: "internal server error"})
+    }
+}
+
+//show access status to student
+module.exports.getAccessStatus = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.studentId).populate({
+            path: 'isEligible.student',
+            select: 'id username'
+        });
+        if (!student) {
+            return res.status(404).json({ msg: 'Student not found' });
+        }
+        res.json(student.isEligible);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
 
 
 // Create Supervisor
@@ -99,7 +132,7 @@ module.exports.deleteSupervisor = async (req, res) => {
 module.exports.addStudent = async (req, res) => {
     try {
         const { username, email, credit_hours, semester, department } = req.body;
-        const newStudent = new Student({ username, email, credit_hours, semester, department });
+        const newStudent = new Student ({ username, email, credit_hours, semester, department });
         const response = await newStudent.save();
         console.log('Student data saved');
         res.status(200).json(response);

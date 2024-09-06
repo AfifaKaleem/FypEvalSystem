@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const SupervisorSchema = new mongoose.Schema({
+    
     username: {
         type: String,
         required: true
@@ -33,7 +34,9 @@ const SupervisorSchema = new mongoose.Schema({
                 default: 'pending'
             }
         }
+    
     ]
+
 });
 
 const Supervisor = mongoose.model('Supervisor', SupervisorSchema);
