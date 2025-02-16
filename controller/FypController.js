@@ -30,7 +30,7 @@ module.exports.getSupervisorAccess = async(req,res)=>{
         if(!supervisor){
             return res.status(404).send("Supervisor not found");
         }
-        if(supervisor.email.endsWith('@faculty.uol.edu.pk')){
+        if(supervisor.email.endsWith('@cs.uol.edu.pk')){
             return res.status(200).json("Supervisor is Eligible to access Fyp System");
         }else{
             return res.status(403).send("Supervisor is not Eligible to access the Fyp System");
