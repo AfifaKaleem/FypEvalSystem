@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 const db = require('./db');
 const LoginSignup = require('./models/LoginSignup');
-const Announcement = require('./models/Annoucement');
+// const Announcement = require('./models/Annoucement');
 const cors = require('cors');
 const morgan = require('morgan');
 
@@ -103,3 +103,75 @@ const port = process.env.PORT||8080;
 app.listen(port, ()=>{
     console.log('listening to the port');
 })
+
+
+// require('dotenv').config();
+// const express = require('express');
+// const bodyParser = require('body-parser');
+// const serverless = require('serverless-http'); // Import serverless-http
+// const cors = require('cors');
+// const morgan = require('morgan');
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
+// const path = require('path');
+
+// const app = express();
+// const db = require('./db');
+// const LoginSignup = require('./models/LoginSignup');
+// // const Announcement = require('./models/Announcement');
+
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+// const allowedOrigins = ['http://localhost:3000', 'http://192.168.18.30:3000'];
+// const multiCorsOptions = {
+//    origin: (origin, callback) => {
+//       if (allowedOrigins.includes(origin) || !origin) {
+//          callback(null, true);
+//       } else {
+//          callback(new Error('Not allowed by CORS'));
+//       }
+//    },
+// };
+
+// app.use(cors(multiCorsOptions));
+
+// passport.use(new LocalStrategy(async (username, password, done) => {
+//    try {
+//       const user = await LoginSignup.findOne({ username });
+//       if (!user) return done(null, false, { message: 'Incorrect username' });
+
+//       const isPasswordMatch = await user.comparePassword(password);
+//       if (isPasswordMatch) {
+//          return done(null, user);
+//       } else {
+//          return done(null, false, { message: 'Incorrect Password' });
+//       }
+//    } catch (err) {
+//       return done(err);
+//    }
+// }));
+
+// app.use(passport.initialize());
+
+// const logRequest = (req, res, next) => {
+//    console.log(`${new Date()} Request made to: ${req.originalUrl}`);
+//    next();
+// };
+
+// app.use(logRequest);
+
+// // Import and use routes
+// const LoginSignupRoutes = require('./routes/LoginSignUpRoutes');
+// const fypHeadRoutes = require('./routes/FypRoutes');
+// const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
+// const DiscussionRoutes = require('./routes/DiscussionRoutes');
+// const AnnouncementRoutes = require('./routes/AnnouncementRoutes');
+
+// app.use('/loginsignup', LoginSignupRoutes);
+// app.use('/fyphead', fypHeadRoutes);
+// app.use('/evaluator', EvaluatorRoutes);
+// app.use('/discussion', DiscussionRoutes);
+// app.use('/announcement', AnnouncementRoutes);
+
+// module.exports.handler = serverless(app); // Export the app for serverless deployment

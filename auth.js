@@ -3,7 +3,7 @@ const passport = require('passport');
 //username and password based  designed for authenticaion
 //extract username and password from req.body
 const LocalStrategy = require('passport-local').Strategy;
-passport.use(new LocalStrategy(async(username,password,done)=>{
+passport.use(new LocalStrategy(async(username,password,role,done)=>{
     //authenticate logic here
     try{
         console.log('Received credentials', username, password);

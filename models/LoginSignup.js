@@ -14,18 +14,18 @@ const LoginSignUpSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/(.*@student\.uol\.edu\.pk$|.*@faculty\.uol\.edu\.pk$|.*@admin\.uol\.edu\.pk$)/, 'Invalid email domain'],
+        match: [/(.*@student\.uol\.edu\.pk$|.*@cs\.uol\.edu\.pk$|.)/, 'Invalid email domain'],
+    },
+    role: {
+        type: [String],
+        enum: ['Student', 'Supervisor', 'Evaluator', 'FypHead'],
+        required: true
     },
     password: {
         type:String,
         required : true, 
         unique: true
     },
-    
-    // confirmpassword:{
-    //     type: String,
-    //     required: true
-    // }
 });
 
 LoginSignUpSchema.pre('save', async function(next){
@@ -67,16 +67,20 @@ LoginSignUpSchema.methods.comparePassword  = async function(candidatePassword){
     }
 }
 
-// // Pre-save middleware to validate that password and confirmpassword match
-// SignUpSchema.pre('save', function (next) {
-//     if (this.password !== this.confirmpassword) {
-//       this.invalidate('confirmpassword', 'Password and confirmpassword do not match');
-//     }
-//     next();
-//   });
-
-
-
+LoginSignUpSchema.virtual('confirmpassword')
+    .set(function(value) {
+        this._confirmpassword = value;
+    })
+    .get(function() {
+        return this._confirmpassword;
+    });
+// Pre-save middleware to validate that password and confirmpassword match
+LoginSignUpSchema.pre('save', function(next) {
+    if (this.password !== this._confirmpassword) {
+        this.invalidate('confirmpassword', 'Password and confirmation do not match');
+    }
+    next();
+});
 
 
 //create LoginSignup model

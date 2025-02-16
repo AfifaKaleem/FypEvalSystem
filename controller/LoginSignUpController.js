@@ -18,10 +18,11 @@ module.exports.signup = async (req, res) => {
             id: response.id,
             username: response.username,
             email: response.email,
-            password: response.password
+            password: response.password,
+            role : response.role
         };
         // Add user to signed up users list
-        SignedUpUsers.push({ username: data.username, email: data.email, password: data.password });
+        SignedUpUsers.push({ username: data.username, email: data.email, password: data.password ,role:data.role});
         console.log(JSON.stringify(payload));
         const token = generateToken(response.username);
         console.log("Token is", token);
@@ -46,11 +47,12 @@ module.exports.login = async (req, res) => {
         const payload = {
             id: user.id,
             email: user.email,
-            password: user.password
+            password: user.password,
+            role: user.role,
         };
         const token = generateToken(payload);
          // Add user to logged-in users list
-         loggedInUsers.push({ email: user.email, password: user.password });
+         loggedInUsers.push({ email: user.email, password: user.password ,role: user.role});
 
         res.json({ token, email: email, payload: payload });
     } catch (err) {
@@ -69,7 +71,7 @@ module.exports.logout = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
          // save user list who have logged out
-        LoggedOutUsers.push({ email: user.email, password: user.password });
+        LoggedOutUsers.push({ email: user.email, password: user.password ,role:user.role});
         user.loggedIn = false;
         await user.save();
         res.json({ message: 'Logged out successfully', user: user });
@@ -95,7 +97,7 @@ module.exports.getAllData = async (req, res) => {
 module.exports.getAll = async (req, res) => {
     try {
         // Fetch only username and email from all users
-        const users = await LoginSignup.find({}, 'username email');
+        const users = await LoginSignup.find({}, 'username email role');
         console.log('Data fetched');
         
         res.status(200).json(users); // Return the array of users with username and email
@@ -115,7 +117,7 @@ module.exports.getUserPassword = async (req, res) => {
         }
 
         console.log('Actual Password:', user.password);
-        res.status(200).json({ username: user.username, email: user.email, password: user.password });
+        res.status(200).json({ username: user.username, email: user.email, password: user.password ,role:user.role});
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -210,16 +212,19 @@ module.exports.updatePassword = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        user.password = password;
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
         await user.save();
 
         console.log('Password successfully updated');
-        res.status(200).json(user);
+        res.status(200).json({ message: 'Password updated successfully' });
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 // Delete user
 module.exports.deleteUser = async (req, res) => {
