@@ -292,8 +292,8 @@ module.exports.getSupervisorRequests = async (req, res) => {
             },
             status: request.status,
             projectProposal: {
-                projectName: request.projectProposal.projectName || null,
-                proposalFile: request.projectProposal.proposalFile || null
+                projectName: request.projectProposal?.projectName || null,
+                proposalFile: request.projectProposal?.proposalFile || null
             },
             remarks: request.remarks
         }));
