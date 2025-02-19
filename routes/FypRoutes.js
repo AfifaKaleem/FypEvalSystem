@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const fypHeadController = require('./../controller/FypController');
 const cors = require('cors');
+const upload = require("./../middleware/upload"); // Multer middleware
+
 
 
 router.get('/studentaccess/:id', cors(),fypHeadController.getStudentAccess);
@@ -18,7 +20,7 @@ router.get('/students', cors(), fypHeadController.getStudents);     //get studen
 router.put('/student/:id', cors(), fypHeadController.updateStudent);  //update students info by id
 router.delete('/student/:id', cors(), fypHeadController.deleteStudent); //delete students info by id
 
-router.post('/request-supervisor', cors(), fypHeadController.requestSupervisor);  //student request a supervisor
+router.post('/request-supervisor', upload.single("proposalFile"),cors(), fypHeadController.requestSupervisor);  //student request a supervisor
 router.get('/:studentId/request-status', cors(), fypHeadController.getRequestStatus); //students gets a accepted or rejected status from supervisor
 router.get('/:supervisorId/requests', cors(), fypHeadController.getSupervisorRequests);  //supervisor gets the student request
 

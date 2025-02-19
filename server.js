@@ -30,7 +30,7 @@ const multiCorsOptions = {
       } 
     }
   };
-app.use(cors());
+app.use(cors(multiCorsOptions));
 
 // app.use(morgan('tiny'));
 // const Fyp = require('./models/Fyp');
@@ -81,6 +81,8 @@ const fypHeadRoutes = require('./routes/FypRoutes');
 const EvaluatorRoutes = require('./routes/EvaluatorRoutes');
 const DiscussionRoutes = require('./routes/DiscussionRoutes');
 const AnnouncementRoutes = require('./routes/AnnouncementRoutes');
+const StudentRoutes = require('./routes/StudentRoutes');
+
 // const studentRoutes = require('./routes/StudentRoutes');
 // const supervisorRoutes = require('./routes/SupervisorRoutes');
 
@@ -94,6 +96,7 @@ app.use('/fyphead', fypHeadRoutes);
 app.use('/evaluator', EvaluatorRoutes);
 app.use('/discussion',DiscussionRoutes);
 app.use('/announcement',AnnouncementRoutes);
+app.use('/student',StudentRoutes);
 
 
 //load the env file

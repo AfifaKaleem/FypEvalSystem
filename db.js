@@ -3,8 +3,8 @@ require('dotenv').config();
 
 //define the MongoDB connection URL
 //replace mydatabase with this FypEvalSystem database name
-const mongoURL = 'mongodb://localhost:27017/FypEvalSystem' 
-// const mongoURL = process.env.DB_URL||DB_URL;
+// const mongoURL = 'mongodb://localhost:27017/FypEvalSystem' 
+const mongoURL = process.env.DB_URL||DB_URL;
 //set up the MongoDB connection
 mongoose.connect(mongoURL,{
     useNewUrlParser:true,

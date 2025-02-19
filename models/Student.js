@@ -33,8 +33,10 @@ const StudentSchema = new mongoose.Schema({
         status: {
             type: String,
             enum: ['pending', 'accepted', 'rejected'],
-            default: 'pending'
-        }
+            default: ''
+        },
+        projectProposal: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectProposal' },
+        remarks: { type: String, default: '',ref:'Supervisor' } // ✅ Store supervisor's remarks
     }
 });
 
@@ -42,23 +44,23 @@ const StudentSchema = new mongoose.Schema({
 
 // Middleware to check eligibility
 StudentSchema.pre('save', function(next) {
-    if (this.credit_hours >= 91 && this.semester >= 6) {
+    if (this.credit_hours >= 91 && this.semester == 6) {
       this.isEligible = true;
     }else {
       this.isEligible = false;
     }
 
-    if(this.credit_hours >=107 && this.semester >=7){
-        this.isEligible = true;
-    }else{
-        this.isEligible = false;
-    }
+    // if(this.credit_hours >=107 && this.semester >=7){
+    //     this.isEligible = true;
+    // }else{
+    //     this.isEligible = false;
+    // }
 
-    if(this.credit_hours >=122 || this.credit_hours <130 && this.semester >=8){
-        this.isEligible = true;
-    }else{
-        this.isEligible = false;
-    }
+    // if(this.credit_hours >=122 || this.credit_hours <130 && this.semester >=8){
+    //     this.isEligible = true;
+    // }else{
+    //     this.isEligible = false;
+    // }
     
     next();
   });

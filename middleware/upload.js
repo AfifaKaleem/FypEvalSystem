@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
-const upload = require('./../middleware/upload')
+
+
 // Configure storage for uploaded files
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

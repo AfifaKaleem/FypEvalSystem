@@ -14,7 +14,7 @@ const LoginSignUpSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/(.*@student\.uol\.edu\.pk$|.*@cs\.uol\.edu\.pk$|.)/, 'Invalid email domain'],
+        match: [/(.*@student\.uol\.edu\.pk$|.*@cs\.uol\.edu\.pk$|.*@admin.cs.uol.edu.pk)/, 'Invalid email domain'],
     },
     role: {
         type: [String],

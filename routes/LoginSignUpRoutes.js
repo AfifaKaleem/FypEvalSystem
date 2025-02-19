@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const loginSignupController = require('./../controller/LoginSignUpController');
 const { jwtAuthMiddleware } = require('./../jwt');
+const {checkFypHead} = require('./../middleware/validateEmail')
 const cors = require('cors');
 
 router.get('/protected-route', jwtAuthMiddleware, (req, res) => {
@@ -10,7 +11,7 @@ router.get('/protected-route', jwtAuthMiddleware, (req, res) => {
     res.json({ message: 'This is a protected route', user: req.user });
  });
  
-router.post('/signup', cors(), loginSignupController.signup);
+router.post('/signup', cors(),checkFypHead, loginSignupController.signup);
 router.post('/login', cors(),loginSignupController.login);
 router.post('/logout', cors(), loginSignupController.logout);
 

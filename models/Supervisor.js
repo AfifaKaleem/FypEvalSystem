@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const ProjectSchema = require('./ProjectSchema');
 
 const SupervisorSchema = new mongoose.Schema({
     
@@ -20,6 +21,10 @@ const SupervisorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    position: {
+        type:String,
+        // required:true
+    },
     studentRequests: [
         {
             student: {
@@ -32,10 +37,17 @@ const SupervisorSchema = new mongoose.Schema({
                 type: String,
                 enum: ['pending', 'accepted', 'rejected'],
                 default: 'pending'
+            },
+            projectProposal: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectProposal' ,projectName:mongoose.Schema.Types.String,proposalFile:mongoose.Schema.Types.String  },
+            remarks: {
+                type:String,
+                default :'',
             }
         }
     
-    ]
+    ],
+    
+    
 
 });
 
