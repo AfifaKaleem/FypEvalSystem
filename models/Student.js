@@ -36,7 +36,7 @@ const StudentSchema = new mongoose.Schema({
             default: ''
         },
         projectProposal: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectProposal' },
-        remarks: { type: String, default: '',ref:'Supervisor' } // ✅ Store supervisor's remarks
+       
     }
 });
 
@@ -49,18 +49,6 @@ StudentSchema.pre('save', function(next) {
     }else {
       this.isEligible = false;
     }
-
-    // if(this.credit_hours >=107 && this.semester >=7){
-    //     this.isEligible = true;
-    // }else{
-    //     this.isEligible = false;
-    // }
-
-    // if(this.credit_hours >=122 || this.credit_hours <130 && this.semester >=8){
-    //     this.isEligible = true;
-    // }else{
-    //     this.isEligible = false;
-    // }
     
     next();
   });
