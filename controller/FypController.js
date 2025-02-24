@@ -4,7 +4,8 @@ const Supervisor = require('../models/Supervisor');
 const Student = require('../models/Student');
 // const ProjectProposal = require('./../models/ProjectSchema');
 const ProjectSchema = require('./../models/ProjectSchema');
-const path = require('path')
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 
 // Route to check access that student is eligible to access fyp system
@@ -237,9 +238,9 @@ module.exports.requestSupervisor = async (req, res) => {
             // proposalFile: req.file.filename // Ensure the exact file is compared
         });
 
-        if (existingProposal) {
+        if (existingProposal.length >= 2) {
             return res.status(400).json({
-                message: "This proposal with the same project name and file has already been submitted by another student."
+                message: "This proposal with the same project name and file has already been submitted by two students."
             });
         }
 
@@ -279,6 +280,99 @@ module.exports.requestSupervisor = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+ // For generating group IDs
+
+//group the two students and assigned them group id so that they can be listed as group members of the same project
+
+
+// Group the two students and assign them a group ID so they can be listed as group members of the same project
+module.exports.groupStudentsWithSameProposal = async (req, res) => {
+    const { supervisorId } = req.params;
+
+    try {
+        // ✅ Fetch proposals submitted to the specific supervisor with status "pending"
+        const proposals = await ProjectSchema.find({ supervisorId })
+            .populate('studentId', 'username email')
+            .populate('supervisorId', 'username email');
+
+        if (!proposals.length) {
+            return res.status(404).json({ message: "No student requests found for this supervisor." });
+        }
+
+        // ✅ Group proposals by projectName and proposalFile
+        const groupedProposals = {};
+        for (const proposal of proposals) {
+            const key = `${proposal.projectName}`;
+
+            if (!groupedProposals[key]) {
+                groupedProposals[key] = [];
+            }
+            groupedProposals[key].push(proposal);
+        }
+
+        // ✅ Prepare the response array
+        const groupedStudents = [];
+
+        // ✅ Assign group IDs to only two students with the same projectName and proposalFile
+        for (const key in groupedProposals) {
+            const students = groupedProposals[key];
+
+            if (students.length === 2) { // Only proceed if there are exactly two students
+                const groupId = uuidv4(); // Generate a unique group ID
+                const studentDetails = [];
+
+                for (const studentProposal of students) {
+                    // ✅ Update ProjectSchema
+                    await ProjectSchema.findByIdAndUpdate(studentProposal._id, { groupId });
+
+                    // ✅ Update Student
+                    await Student.findByIdAndUpdate(studentProposal.studentId._id, {
+                        "supervisorRequest.groupId": groupId
+                    });
+
+                    // ✅ Update Supervisor's student list
+                    await Supervisor.findOneAndUpdate(
+                        { _id: studentProposal.supervisorId, "studentRequests.student": studentProposal.studentId._id },
+                        { $set: { "studentRequests.$.groupId": groupId } }
+                    );
+
+                    // ✅ Collect student details
+                    studentDetails.push({
+                        studentId: studentProposal.studentId._id,
+                        username: studentProposal.studentId.username,
+                        email: studentProposal.studentId.email,
+                        groupId
+                    });
+                }
+
+                // ✅ Push the group's details into the response array
+                groupedStudents.push({
+                    supervisorId: students[0].supervisorId._id,
+                    supervisorName: students[0].supervisorId.name,
+                    projectName: students[0].projectName,
+                    proposalFile: students[0].proposalFile,
+                    students: studentDetails
+                });
+            }
+        }
+
+        if (!groupedStudents.length) {
+            return res.status(404).json({ message: "No groups formed as no proposals matched the criteria or did not have exactly two students." });
+        }
+
+        res.status(200).json({
+            message: "Students grouped successfully!",
+            groupedStudents
+        });
+
+    } catch (err) {
+        console.error("Error in grouping students:", err.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
 
 // const { v4: uuidv4 } = require('uuid'); // Import UUID to generate group IDs
 

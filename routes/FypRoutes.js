@@ -30,4 +30,8 @@ router.get('/pending-requests', cors(), fypHeadController.getPendingRequests);  
 router.post('/respond-request', cors(), fypHeadController.respondRequest);  // supervisor respond to student request
 router.get('/getSpecificSupervisorAlongStudents/:id',cors(),fypHeadController.getSpecificSupervisorAlongStudents); 
 
+// Router for grouping student with same groupid
+router.get('/groupStudents/:supervisorId',cors(), fypHeadController.groupStudentsWithSameProposal);
+
+
 module.exports = router;
