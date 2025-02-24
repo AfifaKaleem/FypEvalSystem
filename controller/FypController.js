@@ -282,10 +282,6 @@ module.exports.requestSupervisor = async (req, res) => {
 };
 
  // For generating group IDs
-
-//group the two students and assigned them group id so that they can be listed as group members of the same project
-
-
 // Group the two students and assign them a group ID so they can be listed as group members of the same project
 module.exports.groupStudentsWithSameProposal = async (req, res) => {
     const { supervisorId } = req.params;
