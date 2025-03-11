@@ -32,26 +32,29 @@ const StudentSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['pending', 'accepted', 'rejected'],
-            default: ''
+            enum: ['pending', 'accepted', 'rejected','rehearse'],
+            default: 'rehearse'
         },
-        projectProposal: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectProposal' },
-       
+        projectProposal: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ProjectProposal', // ✅ Correct Reference to ProjectProposal
+        }
+
     }
 });
 
 
 
 // Middleware to check eligibility
-StudentSchema.pre('save', function(next) {
+StudentSchema.pre('save', function (next) {
     if (this.credit_hours >= 91 && this.semester == 6) {
-      this.isEligible = true;
-    }else {
-      this.isEligible = false;
+        this.isEligible = true;
+    } else {
+        this.isEligible = false;
     }
-    
+
     next();
-  });
+});
 
 const Student = mongoose.model('Student', StudentSchema);
 // const proposal = mongoose.model('proposal', proposalSchema);

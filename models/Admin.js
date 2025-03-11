@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-const FypHeadSchema = new mongoose.Schema({
+const AdminSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true
@@ -22,7 +22,7 @@ const FypHeadSchema = new mongoose.Schema({
 // Create models
 
 
-const FypHead = mongoose.model('FypHead', FypHeadSchema);
+const Admin = mongoose.model('Admin', AdminSchema);
 
 // Export models
-module.exports = FypHead
+module.exports = Admin;

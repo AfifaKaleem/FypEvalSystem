@@ -116,3 +116,27 @@ module.exports.getSpecificEvaluatorAlongStudents = async (req, res) => {
       res.status(500).send({ error: 'Internal server error' });
     }
   }
+
+  //show the list of evaluator assigned to student 
+module.exports.getEvaluatorStudents = async (req, res) => {
+    try {
+        const evaluatorId = req.params.id;
+        const evaluator = await Evaluator.findById(evaluatorId).populate('students');
+        if (!evaluator) {
+            return res.status(404).json({ message: 'Evaluator not found' });
+        }
+        res.status(200).json(evaluator.students);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error });
+    }
+}
+
+//get all the list of evaluators along with their students assigned for evaluation
+module.exports.getAllEvaluatorsWithStudents = async (req, res) => {
+    try {
+        const evaluators = await Evaluator.find().populate('students');
+        res.status(200).json(evaluators);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error });
+    }
+}

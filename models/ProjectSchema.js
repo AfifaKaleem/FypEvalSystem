@@ -1,19 +1,3 @@
-// const mongoose = require('mongoose');
-// const ProjectSchema = new mongoose.Schema({
-//     studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student", required: true },
-//     supervisorId: { type: mongoose.Schema.Types.ObjectId, ref: "Supervisor", required: true },
-//     projectName: { type: String, required: true },
-//     proposalFile: { type: String, required: true }, // Path to the uploaded PDF file
-//     status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
-//     submittedAt: { type: Date, default: Date.now },
-    
-// });
-
-// // module.exports = mongoose.model("ProjectSchema", ProjectSchema);
-
-// const ProjectProposal = mongoose.model("ProjectSchema", ProjectSchema);
-
-// module.exports = ProjectProposal;
 
 
 const mongoose = require('mongoose');
@@ -90,5 +74,23 @@ module.exports = ProjectProposal;
 //     proposal,
 //     proposalTemplate
 // }
+
+
+// const mongoose = require('mongoose');
+// const ProjectSchema = new mongoose.Schema({
+//     studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student", required: true },
+//     supervisorId: { type: mongoose.Schema.Types.ObjectId, ref: "Supervisor", required: true },
+//     projectName: { type: String, required: true },
+//     proposalFile: { type: String, required: true }, // Path to the uploaded PDF file
+//     status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+//     submittedAt: { type: Date, default: Date.now },
+    
+// });
+
+// // module.exports = mongoose.model("ProjectSchema", ProjectSchema);
+
+// const ProjectProposal = mongoose.model("ProjectSchema", ProjectSchema);
+
+// module.exports = ProjectProposal;
 
 

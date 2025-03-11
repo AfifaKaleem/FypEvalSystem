@@ -18,22 +18,22 @@ async function validateEmail(req, res, next) {
     if (['Supervisor', 'Evaluator'].includes(role) && !email.endsWith('@cs.uol.edu.pk')) {
         return res.status(400).json({ message: `Invalid email format for ${role}.` });
     }
-    if (role === 'FypHead' && !email.endsWith('@admin.cs.uol.edu.pk')) {
-        return res.status(400).json({ message: 'Invalid email format for FypHead.' });
+    if (role === 'Admin' && !email.endsWith('@admin.cs.uol.edu.pk')) {
+        return res.status(400).json({ message: 'Invalid email format for Admin.' });
     }
 
     next();
 }
 
-// FypHead validation: Ensure only one FypHead
-async function checkFypHead(req, res, next) {
+// Admin validation: Ensure only one Admin
+async function checkAdmin(req, res, next) {
     const { role,email } = req.body;
 
-    if (role === 'FypHead' && email.endsWith('@admin.cs.uol.edu.pk')) {
-        const existingFypHead = await LoginSignup.findOne({ role: 'FypHead' });
+    if (role === 'Admin' && email.endsWith('@admin.cs.uol.edu.pk')) {
+        const existingAdmin = await LoginSignup.findOne({ role: 'Admin' });
 
-        if (existingFypHead) {
-            return res.status(400).json({ message: 'FypHead already exists.' });
+        if (existingAdmin) {
+            return res.status(400).json({ message: 'Admin already exists.' });
         }
     }
 
@@ -43,5 +43,5 @@ async function checkFypHead(req, res, next) {
 // Export both middlewares
 module.exports = {
     validateEmail,
-    checkFypHead
+    checkAdmin
 };

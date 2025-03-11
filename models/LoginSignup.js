@@ -18,7 +18,7 @@ const LoginSignUpSchema = new mongoose.Schema({
     },
     role: {
         type: [String],
-        enum: ['Student', 'Supervisor', 'Evaluator', 'FypHead'],
+        enum: ['Student', 'Supervisor', 'Evaluator', 'Admin'],
         required: true
     },
     password: {

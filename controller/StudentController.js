@@ -1,7 +1,9 @@
-// controllers/fypHeadController.js
-// const FYPHead = require('../models/FypHead');
+
 const Supervisor = require('../models/Supervisor');
 const Student = require('../models/Student');
+const path = require('path');
+const ProjectSchema = require('./../models/ProjectSchema');
+
 
 
 // Route to check access that student is eligible to access fyp system
@@ -42,20 +44,27 @@ module.exports.getAccessStatus = async (req, res) => {
 };
 
 
-
-// Create Student
 module.exports.addStudent = async (req, res) => {
     try {
         const { username, email, credit_hours, semester, department } = req.body;
-        const newStudent = new Student ({ username, email, credit_hours, semester, department });
-        const response = await newStudent.save();
-        console.log('Student data saved');
-        res.status(200).json(response);
+
+        const newStudent = new Student({
+            username,
+            email,
+            credit_hours,
+            semester,
+            department
+        });
+
+        await newStudent.save();
+        console.log("Student data saved");
+        res.status(200).json(newStudent);
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 // Get Students
 module.exports.getStudents = async (req, res) => {
@@ -111,69 +120,147 @@ module.exports.deleteStudent = async (req, res) => {
     }
 };
 
+
+
+//student request specific supervisor
 module.exports.requestSupervisor = async (req, res) => {
+    const { studentId, studentName, supervisorId, supervisorName, projectName } = req.body;
+
+    // ✅ Validate required fields
+    if (!studentId || !studentName || !supervisorId || !supervisorName || !projectName || !req.file) {
+        return res.status(400).json({ error: 'All fields are required, including the PDF file.' });
+    }
+
     try {
-        const { studentId, studentName, supervisorName, supervisorId, projectName } = req.body;
-
-        // ✅ Validate Student
+        // ✅ Check if student exists
         const student = await Student.findById(studentId);
-        if (!student) return res.status(404).json({ msg: "Student not found" });
-
-        // ✅ Validate Supervisor
-        const supervisor = await Supervisor.findById(supervisorId);
-        if (!supervisor) return res.status(404).json({ msg: "Supervisor not found" });
-
-        // ✅ Ensure Proposal File is Provided
-        if (!req.file) {
-            return res.status(400).json({ message: "Proposal file is required (PDF only)." });
+        if (!student) {
+            return res.status(404).json({ error: 'Student not found' });
         }
 
-        // ✅ Save Proposal Submission
-        const newProposal = new ProjectProposal({
+        // ✅ Check if supervisor exists
+        const supervisor = await Supervisor.findById(supervisorId);
+        if (!supervisor) {
+            return res.status(404).json({ error: 'Supervisor not found' });
+        }
+
+        // ✅ Check if the student already has a pending request
+        if (student.supervisorRequest && student.supervisorRequest.status === 'pending') {
+            return res.status(400).json({ message: "You already have a pending request." });
+        }
+    
+        // ✅ Check if the student has already requested this supervisor
+        const existingRequest = supervisor.studentRequests.find(request =>
+            request.student.toString() === studentId
+        );
+        if (existingRequest) {
+            return res.status(400).json({ message: "You have already requested this supervisor." });
+        }
+        
+        
+
+        // ✅ Check if the same projectName and proposalFile have already been submitted
+        const existingProposal = await ProjectSchema.findOne({
+            projectName: projectName.trim(),
+            // proposalFile: req.file.filename // Ensure the exact file is compared
+        });
+
+        if (existingProposal && existingProposal.length >= 2) {
+            return res.status(400).json({
+                message: "This proposal with the same project name and file has already been submitted by two students."
+            });
+        }
+
+        // ✅ Save the proposal in the database
+        const newProposal = new ProjectSchema({
             studentId,
             supervisorId,
-            projectName,
-            proposalFile: req.file.path // Save file path
+            projectName: projectName.trim(), // Trim to avoid whitespace differences
+            proposalFile: req.file.filename
         });
 
         await newProposal.save();
 
-        // ✅ Update Student & Supervisor Requests
-        student.supervisorRequest = { supervisor: supervisorId, supervisorName, status: "pending" };
+        // ✅ Update student's request
+        student.supervisorRequest = { supervisor: supervisorId, supervisorName, status: 'pending' };
         await student.save();
 
-        supervisor.studentRequests.push({ student: studentId, studentName, status: "pending" });
+        // ✅ Update supervisor's student list with projectProposal reference
+        supervisor.studentRequests.push({
+            student: studentId,
+            studentName,
+            status: 'pending',
+            projectProposal: newProposal._id
+        });
         await supervisor.save();
 
-        res.status(201).json({ 
-            message: "Proposal submitted successfully!", 
+        // ✅ Success response
+        res.status(201).json({
+            message: 'Proposal submitted successfully!',
             proposal: newProposal,
             student: student,
             supervisor: supervisor
         });
 
     } catch (err) {
-        console.error("Error:", err.message);
-        res.status(500).json({ message: "Internal Server Error", error: err.message });
+        console.error("Error in requestSupervisor:", err.message);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 
 // Get supervisor request status
 module.exports.getRequestStatus = async (req, res) => {
     try {
-        const student = await Student.findById(req.params.studentId).populate({
-            path: 'supervisorRequest.supervisor',
-            select: 'id username'
-        });
+        // ✅ Find student and populate supervisor & projectProposal details
+        const student = await Student.findById(req.params.studentId)
+            .populate({
+                path: 'supervisorRequest.supervisor',
+                select: 'id username email'
+            })
+            .populate({
+                path: 'supervisorRequest.projectProposal',
+                select: 'projectName proposalFile'
+            })
+            .select('username email supervisorRequest'); // Selecting only relevant fields
+
         if (!student) {
-            return res.status(404).json({ msg: 'Student not found' });
+            return res.status(404).json({ error: 'Student not found' });
         }
-        res.json(student.supervisorRequest);
+
+        // ✅ Prepare response ensuring no null values
+        const response = {
+            msg: "Show Response from Supervisor to Student",
+            student: {
+                id: student._id,
+                username: student.username,
+                email: student.email
+            },
+            supervisor: student.supervisorRequest?.supervisor
+                ? {
+                    id: student.supervisorRequest.supervisor._id,
+                    username: student.supervisorRequest.supervisor.username,
+                    email: student.supervisorRequest.supervisor.email
+                }
+                : undefined, // Avoids returning null if supervisor is missing
+            status: student.supervisorRequest?.status || "Pending", // Default to "Pending" if no status
+            projectProposal: student.supervisorRequest?.projectProposal
+                ? {
+                    projectName: student.supervisorRequest.projectProposal.projectName,
+                    proposalFile: student.supervisorRequest.projectProposal.proposalFile
+                }
+                : undefined // Avoids returning null if no projectProposal
+        };
+
+        console.log("✅ Supervisor Request Response:", response); // Debugging log
+
+        res.status(200).json(response);
+
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error("❌ Error fetching request status:", err.message);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {

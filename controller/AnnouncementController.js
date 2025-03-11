@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 const Announcement = require('./../models/Annoucement');
-const FypHead = require('./../models/FypHead');
+const FypHead = require('./../models/Admin');
 const Student = require('../models/Student');
 
 
 module.exports.createAnnouncement = async(req,res)=>{
-    const requiredRole = "FypHead"
+    const requiredRole = "Admin"
     try{
         const data = req.body;
         // Check if the user is authorized as FypHead
-        if (requiredRole !== "FypHead") {
-            return res.status(403).json({ message: 'Access denied. Only FYP Head can perform this action.' });
+        if (requiredRole !== "Admin") {
+            return res.status(403).json({ message: 'Access denied. Only Admin  can perform this action.' });
         }
         // if(requiredRole === "FypHead"){
         //     return res.status(200).json({message : "Access granted. Fyp head had just posted a new announcement"})
