@@ -13,6 +13,6 @@ router.delete('/supervisor/:id', cors(), SupervisorController.deleteSupervisor);
 router.get('/:supervisorId/requests', cors(), SupervisorController.getStudentRequests);  //supervisor gets the student request
 router.post('/respond-request', cors(), SupervisorController.respondtoStudentRequest);  // supervisor respond to student request
 
-router.get('/view-accepted-requests', cors(), SupervisorController.viewListofStudentsUnderSupervision);  //list of accepted list of students under his supervision
+router.get('/view-accepted-requests/:id', cors(), SupervisorController.viewListofStudentsUnderSupervision);  //list of accepted list of students under his supervision
 
 module.exports = router;

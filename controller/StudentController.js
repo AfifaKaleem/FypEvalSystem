@@ -3,6 +3,7 @@ const Supervisor = require('../models/Supervisor');
 const Student = require('../models/Student');
 const path = require('path');
 const ProjectSchema = require('./../models/ProjectSchema');
+const ProjectProposal = require('./../models/ProjectSchema');
 
 
 
@@ -211,7 +212,6 @@ module.exports.requestSupervisor = async (req, res) => {
 // Get supervisor request status
 module.exports.getRequestStatus = async (req, res) => {
     try {
-        // ✅ Find student and populate supervisor & projectProposal details
         const student = await Student.findById(req.params.studentId)
             .populate({
                 path: 'supervisorRequest.supervisor',
@@ -221,13 +221,13 @@ module.exports.getRequestStatus = async (req, res) => {
                 path: 'supervisorRequest.projectProposal',
                 select: 'projectName proposalFile'
             })
-            .select('username email supervisorRequest'); // Selecting only relevant fields
+            .select('username email supervisorRequest'); // Select only relevant fields
 
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
         }
 
-        // ✅ Prepare response ensuring no null values
+        // ✅ Construct response ensuring no null/undefined values
         const response = {
             msg: "Show Response from Supervisor to Student",
             student: {
@@ -241,20 +241,15 @@ module.exports.getRequestStatus = async (req, res) => {
                     username: student.supervisorRequest.supervisor.username,
                     email: student.supervisorRequest.supervisor.email
                 }
-                : undefined, // Avoids returning null if supervisor is missing
-            status: student.supervisorRequest?.status || "Pending", // Default to "Pending" if no status
-            projectProposal: student.supervisorRequest?.projectProposal
-                ? {
-                    projectName: student.supervisorRequest.projectProposal.projectName,
-                    proposalFile: student.supervisorRequest.projectProposal.proposalFile
-                }
-                : undefined // Avoids returning null if no projectProposal
-        };
+                : null,  // ✅ Return `null` instead of `undefined`
+            status: student.supervisorRequest?.status || "Pending",
+            proposal:student.supervisorRequest.projectProposal|| ProjectProposal
+            }
+        
 
-        console.log("✅ Supervisor Request Response:", response); // Debugging log
+        console.log("✅ Supervisor Request Response:", JSON.stringify({response},null,2));
 
-        res.status(200).json(response);
-
+        res.status(200).json({response});
     } catch (err) {
         console.error("❌ Error fetching request status:", err.message);
         res.status(500).json({ error: 'Internal server error' });

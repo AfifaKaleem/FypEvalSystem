@@ -27,21 +27,20 @@ const StudentSchema = new mongoose.Schema({
         supervisor: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Supervisor',
-            username: mongoose.Schema.Types.String,
-            email: mongoose.Schema.Types.String
+            // username: mongoose.Schema.Types.String,
+            // email: mongoose.Schema.Types.String
         },
         status: {
             type: String,
             enum: ['pending', 'accepted', 'rejected','rehearse'],
             default: 'rehearse'
         },
-        projectProposal: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'ProjectProposal', // ✅ Correct Reference to ProjectProposal
+        projectProposal: { type: mongoose.Schema.Types.ObjectId, ref: "ProjectProposal" }  // ✅ Correct Reference to ProjectProposal
         }
-
+       
+    
     }
-});
+);
 
 
 

@@ -334,45 +334,55 @@ module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {
 };
 
 
+
 // Get list of accepted supervisor-student pairs
 module.exports.getAcceptedRequests = async (req, res) => {
     try {
         const students = await Student.find({ 'supervisorRequest.status': 'accepted' })
             .populate({
                 path: 'supervisorRequest.supervisor',
-                select: 'id username'
+                select: 'id username email domain office position'  // ✅ Selecting relevant fields
             })
             .populate({
-                path: 'supervisorRequest.projectProposal', // ✅ Ensure this path is correct
+                path: 'supervisorRequest.projectProposal',
                 select: 'projectName proposalFile'
             });
 
-        const acceptedRequests = students.map(student => ({
-            studentId: student.id,
-            studentUsername: student.username,
-            supervisorId: student.supervisorRequest.supervisor.id,
-            supervisorUsername: student.supervisorRequest.supervisor.username,
-            status: student.supervisorRequest.status,
-            projectName: student.supervisorRequest.projectProposal?.projectName || 'N/A',
-            proposalFile: student.supervisorRequest.projectProposal?.proposalFile || 'N/A',
-            projectProposal: student.supervisorRequest.projectProposal
+        // Format response
+        const formattedRequests = students.map(student => ({
+            student: {
+                username: student.username || "Unknown",
+                email: student.email || "No email",
+                status: student.supervisorRequest?.status || "No status"
+            },
+            supervisor: student.supervisorRequest?.supervisor
                 ? {
-                    projectName: student.supervisorRequest.supervisor.projectProposal.projectName,
-                    proposalFile: student.supervisorRequest.supervisor.projectProposal.proposalFile
+                    username: student.supervisorRequest.supervisor.username || "Unknown",
+                    email: student.supervisorRequest.supervisor.email || "No email",
+                    domain: student.supervisorRequest.supervisor.domain || "No domain",
+                    office: student.supervisorRequest.supervisor.office || "No office",
+                    position: student.supervisorRequest.supervisor.position || "No position"
                 }
-                : null
-            }));
-        console.log("These Supervisors have Accepted the Students' Requests", acceptedRequests);
+                : "No supervisor assigned",
+            projectProposal: student.supervisorRequest?.projectProposal
+                ? {
+                    projectName: student.supervisorRequest.projectProposal.projectName,
+                    proposalFile: student.supervisorRequest.projectProposal.proposalFile
+                }
+                : "No project proposal"
+        }));
+
+        console.log("These Supervisors have Accepted the Students' Requests", formattedRequests);
+
         res.status(200).json({
             message: "These Supervisors have Accepted the Students' Requests and their details are shown below",
-            acceptedRequests
+            formattedRequests
         });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
-
 
 
 // Get list of rejected supervisor-student pairs

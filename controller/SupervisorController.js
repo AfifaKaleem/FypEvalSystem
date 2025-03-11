@@ -128,7 +128,7 @@ module.exports.getStudentRequests = async (req, res) => {
             },
         }));
 
-        res.status(200).json({msg: "Supervisor gets the proposal of Students and view their proposal",studentRequests: formattedRequests });
+        res.status(200).json({ msg: "Supervisor gets the proposal of Students and view their proposal", studentRequests: formattedRequests });
 
     } catch (err) {
         console.error("Error fetching supervisor requests:", err.message);
@@ -213,7 +213,7 @@ module.exports.respondtoStudentRequest = async (req, res) => {
                     } : null
                 }))
             }
-           
+
         });
         await student.save();
     } catch (err) {
@@ -241,17 +241,25 @@ module.exports.viewListofStudentsUnderSupervision = async (req, res) => {
             return res.status(404).json({ message: 'Supervisor not found' });
         }
 
-        const acceptedStudents = supervisor.studentRequests.filter(request => request.status === 'accepted');
+        // Filter only accepted students
+        const acceptedStudents = supervisor.studentRequests.filter(request =>
+            request.status === 'accepted' && request.student
+        );
 
+        // Format response
         const formattedRequests = acceptedStudents.map(request => ({
             student: {
-                username: request.student.username,
-                email: request.student.email
+                username: request.student?.username || "Unknown",
+                email: request.student?.email || "No email",
+                status: request.status || "No status" 
             },
-            projectProposal: {
-                projectName: request.projectProposal?.projectName || null,
-                proposalFile: request.projectProposal?.proposalFile || null
-            }
+
+            projectProposal: request.projectProposal
+                ? {
+                    projectName: request.projectProposal.projectName,
+                    proposalFile: request.projectProposal.proposalFile
+                }
+                : null
         }));
 
         res.status(200).json({ msg: "Accepted students and their proposals", studentRequests: formattedRequests });
