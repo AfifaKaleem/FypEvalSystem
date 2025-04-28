@@ -611,7 +611,6 @@ module.exports.deleteStudent = async (req, res) => {
 };
 
 // ✅ Request supervisor
-
 // module.exports.requestSupervisor = async (req, res) => {
 //     const { projectName, studentEmail, supervisorEmail } = req.body;
 
@@ -628,14 +627,14 @@ module.exports.deleteStudent = async (req, res) => {
 //         const supervisor = await Supervisor.findOne({ email: supervisorEmail });
 //         if (!supervisor) return res.status(404).json({ error: 'Supervisor not found' });
 
-//         // if (student.supervisorRequest && student.supervisorRequest.status === 'pending') {
-//         //     return res.status(400).json({ error: 'Student has already requested a supervisor.' });
-//         // }
+//         if (student.supervisorRequest && student.supervisorRequest.status === 'pending') {
+//             return res.status(400).json({ error: 'Student has already requested a supervisor.' });
+//         }
 
-//         // const existingProposals = await ProjectSchema.find({ projectName: projectName.trim() });
-//         // if (existingProposals.length >= 2) {
-//         //     return res.status(400).json({ message: "This project has already been submitted by two students." });
-//         // }
+//         const existingProposals = await ProjectSchema.find({ projectName: projectName.trim() });
+//         if (existingProposals.length >= 2) {
+//             return res.status(400).json({ message: "This project has already been submitted by two students." });
+//         }
 
 //         const newProposal = new ProjectSchema({
 //             studentId: student._id,
@@ -660,20 +659,10 @@ module.exports.deleteStudent = async (req, res) => {
 //         });
 //         await supervisor.save();
 
-//         // Create file link
-//         const fileLink = `${req.protocol}://${req.get('host')}/file/view-file/${req.file.filename}`;
-
-//         // http://localhost:8080/file/view-file/1745828894388-555605051.pdf
-//         // no case of file not found
-//         // http://localhost:8080/uploads/1745828847572-Python_Assignment_HaroonIshaq.pdf
-
 //         console.log("Proposal submitted:", student.email, supervisor.email);
 //         res.status(201).json({
 //             message: 'Proposal submitted successfully!',
-//             proposal: {
-//                 ...newProposal.toObject(),
-//                 proposalFileLink: fileLink
-//             },
+//             proposal: newProposal,
 //             studentEmail: student.email,
 //             supervisorEmail: supervisor.email
 //         });
@@ -685,6 +674,7 @@ module.exports.deleteStudent = async (req, res) => {
 // };
 
 
+// ✅ Request supervisor
 module.exports.requestSupervisor = async (req, res) => {
     const { projectName, studentEmail, supervisorEmail } = req.body;
 
@@ -701,11 +691,20 @@ module.exports.requestSupervisor = async (req, res) => {
         const supervisor = await Supervisor.findOne({ email: supervisorEmail });
         if (!supervisor) return res.status(404).json({ error: 'Supervisor not found' });
 
+        // if (student.supervisorRequest && student.supervisorRequest.status === 'pending') {
+        //     return res.status(400).json({ error: 'Student has already requested a supervisor.' });
+        // }
+
+        // const existingProposals = await ProjectSchema.find({ projectName: projectName.trim() });
+        // if (existingProposals.length >= 2) {
+        //     return res.status(400).json({ message: "This project has already been submitted by two students." });
+        // }
+
         const newProposal = new ProjectSchema({
             studentId: student._id,
             supervisorId: supervisor._id,
             projectName: projectName.trim(),
-            proposalFile: req.file.filename // Storing only filename in DB
+            proposalFile: req.file.filename
         });
         await newProposal.save();
 
@@ -724,16 +723,19 @@ module.exports.requestSupervisor = async (req, res) => {
         });
         await supervisor.save();
 
-        // Create the file link for response
+        // Create file link
         const fileLink = `${req.protocol}://${req.get('host')}/file/view-file/${req.file.filename}`;
 
-        console.log("Proposal submitted:", student.email, supervisor.email);
+        // http://localhost:8080/file/view-file/1745828894388-555605051.pdf
+        // no case of file not found
+        // http://localhost:8080/uploads/1745828847572-Python_Assignment_HaroonIshaq.pdf
 
+        console.log("Proposal submitted:", student.email, supervisor.email);
         res.status(201).json({
             message: 'Proposal submitted successfully!',
             proposal: {
                 ...newProposal.toObject(),
-                proposalFile: fileLink  // Show the file link directly in the proposalFile property
+                proposalFileLink: fileLink
             },
             studentEmail: student.email,
             supervisorEmail: supervisor.email

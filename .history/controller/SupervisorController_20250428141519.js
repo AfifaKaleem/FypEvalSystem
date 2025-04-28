@@ -135,7 +135,6 @@ module.exports.deleteSupervisor = async (req, res) => {
 // };
 
 
-
 module.exports.getStudentRequests = async (req, res) => {
     try {
         const { supervisorId } = req.params;
@@ -181,89 +180,6 @@ module.exports.getStudentRequests = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error", error: err.message });
     }
 };
-
-// module.exports.respondtoStudentRequest = async (req, res) => {
-//     const { response, studentEmail, supervisorEmail } = req.body;
-
-//     if (!supervisorEmail || !studentEmail || !response) {
-//         return res.status(400).json({ error: 'Supervisor email, Student email, and Response are required' });
-//     }
-
-//     try {
-//         // ✅ Find supervisor by email and populate studentRequests
-//         const supervisor = await Supervisor.findOne({ email: supervisorEmail })
-//             .populate({
-//                 path: 'studentRequests.student',
-//                 select: 'username email'
-//             })
-//             .populate({
-//                 path: 'studentRequests.projectProposal',
-//                 select: 'projectName proposalFile'
-//             });
-
-//         if (!supervisor) {
-//             return res.status(404).json({ error: 'Supervisor not found' });
-//         }
-
-//         // ✅ Get student by email
-//         const student = await Student.findOne({ email: studentEmail });
-//         if (!student) {
-//             return res.status(404).json({ error: 'Student not found' });
-//         }
-
-//         // ✅ Check supervisor student limit (max 15 accepted)
-//         const acceptedStudentsCount = await Student.countDocuments({
-//             'supervisorRequest.supervisor': supervisor._id,
-//             'supervisorRequest.status': 'accepted'
-//         });
-
-//         if (response === 'accepted' && acceptedStudentsCount >= 15) {
-//             return res.status(400).json({ error: 'Supervisor has already accepted 15 students' });
-//         }
-
-//         // ✅ Find the specific request in supervisor's list
-//         const studentRequest = supervisor.studentRequests.find(req =>
-//             req.student && req.student._id.toString() === student._id.toString()
-//         );
-
-//         if (!studentRequest) {
-//             return res.status(404).json({ error: 'Student request not found in supervisor record' });
-//         }
-
-//         // ✅ Update status in both supervisor and student documents
-//         studentRequest.status = response;
-//         await supervisor.save();
-
-//         if (student.supervisorRequest && student.supervisorRequest.supervisor.toString() === supervisor._id.toString()) {
-//             student.supervisorRequest.status = response;
-//             await student.save();
-//         }
-//         console.log("Student request status updated:", studentRequest.status, studentRequest.student.username, studentRequest.student.email);
-//         // ✅ Respond with relevant details
-//         return res.status(200).json({
-//             msg: "Response recorded successfully",
-//             studentEmail: student.email,
-//             supervisorEmail: supervisor.email,
-//             updatedRequest: {
-                
-//                     studentUsername: student.username,
-//                     studentEmail: student.email,
-//                     status: studentRequest.status,
-//                 projectProposal: studentRequest.projectProposal ? {
-//                     projectName: studentRequest.projectProposal.projectName,
-//                     proposalFile: studentRequest.projectProposal.proposalFile
-//                 } : null
-//             }
-//         });
-
-//     } catch (err) {
-//         console.error("Error responding to student request:", err.message);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// };
-
-
-
 
 
 module.exports.respondtoStudentRequest = async (req, res) => {
@@ -322,26 +238,20 @@ module.exports.respondtoStudentRequest = async (req, res) => {
             student.supervisorRequest.status = response;
             await student.save();
         }
-
         console.log("Student request status updated:", studentRequest.status, studentRequest.student.username, studentRequest.student.email);
-
-        // ✅ Generate the proposalFile link
-        const proposalFileLink = studentRequest.projectProposal?.proposalFile 
-            ? `${req.protocol}://${req.get('host')}/file/view-file/${studentRequest.projectProposal.proposalFile}`
-            : null;
-
-        // ✅ Respond with relevant details, including the proposalFile link
+        // ✅ Respond with relevant details
         return res.status(200).json({
             msg: "Response recorded successfully",
             studentEmail: student.email,
             supervisorEmail: supervisor.email,
             updatedRequest: {
-                studentUsername: student.username,
-                studentEmail: student.email,
-                status: studentRequest.status,
+                
+                    studentUsername: student.username,
+                    studentEmail: student.email,
+                    status: studentRequest.status,
                 projectProposal: studentRequest.projectProposal ? {
                     projectName: studentRequest.projectProposal.projectName,
-                    proposalFile: proposalFileLink // Include the link to the proposal file
+                    proposalFile: studentRequest.projectProposal.proposalFile
                 } : null
             }
         });
@@ -351,6 +261,7 @@ module.exports.respondtoStudentRequest = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 //supervisor can see his accepted students list for supervision along with their projectName and proposalsFile
 module.exports.viewListofStudentsUnderSupervision = async (req, res) => {

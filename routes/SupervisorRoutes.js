@@ -3,7 +3,7 @@ const router = express.Router();
 const SupervisorController = require('./../controller/SupervisorController');
 const cors = require('cors');
 
-router.get('/supervisoraccess/:id',cors(),SupervisorController.getSupervisorAccess);
+// router.get('/supervisoraccess/:id',cors(),SupervisorController.getSupervisorAccess);
 
 router.post('/add-supervisor', cors(), SupervisorController.addSupervisor);      //create supervisor
 router.get('/supervisors', cors(), SupervisorController.getSupervisors);         //get supervisors list

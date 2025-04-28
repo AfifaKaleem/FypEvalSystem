@@ -2,6 +2,7 @@
 // const FYPHead = require('../models/Admin');
 const Supervisor = require('../models/Supervisor');
 const Student = require('../models/Student');
+const Evaluator = require('../models/Evaluator');
 // const ProjectProposal = require('./../models/ProjectSchema');
 const ProjectSchema = require('./../models/ProjectSchema');
 // const path = require('path');
@@ -202,7 +203,7 @@ module.exports.deleteStudent = async (req, res) => {
 };
 
 
- // For generating group IDs
+// For generating group IDs
 // Group the two students and assign them a group ID so they can be listed as group members of the same project
 module.exports.groupStudentsWithSameProposal = async (req, res) => {
     const { supervisorId } = req.params;
@@ -262,7 +263,7 @@ module.exports.groupStudentsWithSameProposal = async (req, res) => {
                         groupId
                     });
                 }
-               
+
                 // ✅ Push the group's details into the response array
                 groupedStudents.push({
                     supervisorId: students[0].supervisorId._id,
@@ -300,7 +301,7 @@ module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {
         // ✅ Fetch students under this supervisor and include their project details
         const students = await Student.find({ 'supervisorRequest.supervisor': req.params.id })
             .populate({
-                path: 'supervisorRequest.projectProposal', 
+                path: 'supervisorRequest.projectProposal',
                 select: 'projectName proposalFile'
             })
             .select('username email supervisorRequest'); // Selecting relevant fields
@@ -322,7 +323,7 @@ module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {
                             projectName: student.supervisorRequest.projectProposal.projectName,
                             proposalFile: student.supervisorRequest.projectProposal.proposalFile
                         }
-                        : undefined 
+                        : undefined
                 }))
             }
         });
@@ -335,51 +336,141 @@ module.exports.getSpecificSupervisorAlongStudents = async (req, res) => {
 
 
 
-// Get list of accepted supervisor-student pairs
+// // Get list of accepted supervisor-student pairs
+// module.exports.getAcceptedRequests = async (req, res) => {
+//     try {
+//         const students = await Student.find({ 'supervisorRequest.status': 'accepted' })
+//             .populate({
+//                 path: 'supervisorRequest.supervisor',
+//                 select: 'id username email domain office position'  // ✅ Selecting relevant fields
+//             })
+//             .populate({
+//                 path: 'supervisorRequest.projectProposal',
+//                 select: 'projectName proposalFile'
+//             });
+
+//         // Format response
+//         const formattedRequests = students.map(student => ({
+//             student: {
+//                 username: student.username || "Unknown",
+//                 email: student.email || "No email",
+//                 status: student.supervisorRequest?.status || "No status"
+//             },
+//             supervisor: student.supervisorRequest?.supervisor
+//                 ? {
+//                     username: student.supervisorRequest.supervisor.username || "Unknown",
+//                     email: student.supervisorRequest.supervisor.email || "No email",
+//                     domain: student.supervisorRequest.supervisor.domain || "No domain",
+//                     office: student.supervisorRequest.supervisor.office || "No office",
+//                     position: student.supervisorRequest.supervisor.position || "No position"
+//                 }
+//                 : "No supervisor assigned",
+//             projectProposal: student.supervisorRequest?.projectProposal
+//                 ? {
+//                     projectName: student.supervisorRequest.projectProposal.projectName,
+//                     proposalFile: student.supervisorRequest.projectProposal.proposalFile
+//                 }
+//                 : "No project proposal"
+//         }));
+
+//         console.log("These Supervisors have Accepted the Students' Requests", formattedRequests);
+
+//         res.status(200).json({
+//             message: "These Supervisors have Accepted the Students' Requests and their details are shown below",
+//             formattedRequests
+//         });
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send('Server Error');
+//     }
+// };
+
+
+// // Get list of rejected supervisor-student pairs
+// module.exports.getRejectedRequests = async (req, res) => {
+//     try {
+//         const students = await Student.find({ 'supervisorRequest.status': 'rejected' }).populate({
+//             path: 'supervisorRequest.supervisor',
+//             select: 'id username'
+//         });
+
+//         const rejectedRequests = students.map(student => ({
+//             studentId: student.id,
+//             studentUsername: student.username,
+//             supervisorId: student.supervisorRequest.supervisor.id,
+//             supervisorUsername: student.supervisorRequest.supervisor.username,
+//             status: student.supervisorRequest.status,
+//             projectProposal :student.supervisorRequest.projectProposal,
+//         }));
+//         console.log("These Supervisors has Rejected the Students Request", rejectedRequests);
+//         res.status(200).json({
+//             message: "These Supervisors has Rejected the Students Request",
+//             rejectedRequests
+//         });
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send('Server Error');
+//     }
+// };
+
+// // Get list of pending supervisor-student pairs
+// module.exports.getPendingRequests = async (req, res) => {
+//     try {
+//         const students = await Student.find({ 'supervisorRequest.status': 'pending' }).populate({
+//             path: 'supervisorRequest.supervisor',
+//             select: 'id username'
+//         });
+
+//         const pendingRequests = students
+//             .filter(student => student.supervisorRequest.supervisor)
+//             .map(student => ({
+//                 studentId: student.id,
+//                 studentUsername: student.username,
+//                 supervisorId: student.supervisorRequest.supervisor.id,
+//                 supervisorUsername: student.supervisorRequest.supervisor.username,
+//                 status: student.supervisorRequest.status
+//             }));
+
+//         console.log("These Supervisors have pending requests from students", pendingRequests);
+//         res.status(200).json({
+//             message: "These Supervisors have pending requests from students",
+//             pendingRequests
+//         });
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send('Server Error');
+//     }
+// };
+
+
 module.exports.getAcceptedRequests = async (req, res) => {
     try {
         const students = await Student.find({ 'supervisorRequest.status': 'accepted' })
             .populate({
                 path: 'supervisorRequest.supervisor',
-                select: 'id username email domain office position'  // ✅ Selecting relevant fields
-            })
-            .populate({
-                path: 'supervisorRequest.projectProposal',
-                select: 'projectName proposalFile'
+                select: 'username email'
             });
 
-        // Format response
-        const formattedRequests = students.map(student => ({
-            student: {
-                username: student.username || "Unknown",
-                email: student.email || "No email",
-                status: student.supervisorRequest?.status || "No status"
-            },
-            supervisor: student.supervisorRequest?.supervisor
-                ? {
-                    username: student.supervisorRequest.supervisor.username || "Unknown",
-                    email: student.supervisorRequest.supervisor.email || "No email",
-                    domain: student.supervisorRequest.supervisor.domain || "No domain",
-                    office: student.supervisorRequest.supervisor.office || "No office",
-                    position: student.supervisorRequest.supervisor.position || "No position"
-                }
-                : "No supervisor assigned",
-            projectProposal: student.supervisorRequest?.projectProposal
-                ? {
-                    projectName: student.supervisorRequest.projectProposal.projectName,
-                    proposalFile: student.supervisorRequest.projectProposal.proposalFile
-                }
-                : "No project proposal"
-        }));
+        const acceptedRequests = students
+            .filter(student => student.supervisorRequest && student.supervisorRequest.supervisor)
+            .map(student => ({
+                studentId: student.id,
+                studentName: student.username || "Unknown",
+                studentEmail: student.email || "No email",
+                
+                supervisorName: student.supervisorRequest.supervisor.username || "Unknown",
+                supervisorEmail: student.supervisorRequest.supervisor.email || "No email",
+                status: student.supervisorRequest.status || "No status"
+            }));
 
-        console.log("These Supervisors have Accepted the Students' Requests", formattedRequests);
+        console.log("✅ Accepted Supervisor-Student Pairs:", acceptedRequests);
 
         res.status(200).json({
-            message: "These Supervisors have Accepted the Students' Requests and their details are shown below",
-            formattedRequests
+            message: "List of supervisors who have accepted students",
+            acceptedRequests
         });
     } catch (err) {
-        console.error(err.message);
+        console.error("❌ Error fetching accepted requests:", err.message);
         res.status(500).send('Server Error');
     }
 };
@@ -393,17 +484,22 @@ module.exports.getRejectedRequests = async (req, res) => {
             select: 'id username'
         });
 
-        const rejectedRequests = students.map(student => ({
-            studentId: student.id,
-            studentUsername: student.username,
-            supervisorId: student.supervisorRequest.supervisor.id,
-            supervisorUsername: student.supervisorRequest.supervisor.username,
-            status: student.supervisorRequest.status,
-            projectProposal :student.supervisorRequest.projectProposal,
-        }));
-        console.log("These Supervisors has Rejected the Students Request", rejectedRequests);
+        const rejectedRequests = students
+            .filter(student => student.supervisorRequest && student.supervisorRequest.supervisor)
+            .map(student => ({
+                studentId: student.id,
+                studentName: student.username || "Unknown",
+                studentEmail: student.email || "No email",
+                supervisorId: student.supervisorRequest.supervisor.id,
+                supervisorName: student.supervisorRequest.supervisor.username || "Unknown",
+                supervisorEmail: student.supervisorRequest.supervisor.email || "No email",
+                status: student.supervisorRequest.status || "No status"
+            }));
+            
+        console.log("✅ Accepted Supervisor-Student Pairs:", rejectedRequests);
+
         res.status(200).json({
-            message: "These Supervisors has Rejected the Students Request",
+            message: "List of supervisors who have accepted students",
             rejectedRequests
         });
     } catch (err) {
@@ -411,6 +507,7 @@ module.exports.getRejectedRequests = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
 
 // Get list of pending supervisor-student pairs
 module.exports.getPendingRequests = async (req, res) => {
@@ -442,4 +539,102 @@ module.exports.getPendingRequests = async (req, res) => {
 };
 
 
+// Create Evaluator
+module.exports.addEvaluator = async (req, res) => {
+    try {
+        const { username, email, office } = req.body;
+        const newEvaluator = new Evaluator({ username, email, office });
+        const response = await newEvaluator.save();
+        console.log('Evaluator data saved');
+        res.status(200).json({ message: "Evaluator data is added successfully", response });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
+// Get Evaluators
+module.exports.getEvaluators = async (req, res) => {
+    try {
+        const data = await Evaluator.find().select('email username office');
+        console.log('Evaluator data fetched');
+        res.status(200).json(data);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// Update Evaluator
+module.exports.updateEvaluator = async (req, res) => {
+    try {
+        const evaluatorId = req.params.id;
+        const updatedEvaluatorData = req.body;
+
+        const response = await Evaluator.findByIdAndUpdate(evaluatorId, updatedEvaluatorData, {
+            new: true, // Return the updated document
+            runValidators: true, // Run mongoose validation
+        });
+
+        if (!response) {
+            return res.status(404).json({ error: 'Evaluator not found' });
+        }
+
+        console.log('Evaluator data updated');
+        res.status(200).json(response);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// Delete Evaluator
+module.exports.deleteEvaluator = async (req, res) => {
+    try {
+        const evaluatorId = req.params.id;
+
+        const response = await Evaluator.findByIdAndDelete(evaluatorId);
+
+        if (!response) {
+            return res.status(404).json({ error: 'Evaluator not found' });
+        }
+
+        console.log('Evaluator data deleted');
+        res.status(200).json({ message: 'Evaluator deleted successfully' });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+//assign evaluator to student
+module.exports.assignEvaluator = async (req, res) => {
+    try {
+        const { evaluatorEmail, studentEmail } = req.body;
+        const evaluator = await Evaluator.findById(evaluatorId);
+        const student = await Student.findById(studentId);
+
+        if (!evaluator || !student) {
+            return res.status(404).json({ error: 'Evaluator or Student not found' });
+        }
+
+        // Check if the student is already assigned to the evaluator
+        const isAlreadyAssigned = evaluator.studentsAssigned.some(
+            (assignment) => assignment.student.toString() === studentId
+        );
+
+        if (isAlreadyAssigned) {
+            return res.status(400).json({ error: 'Student is already assigned to this evaluator' });
+        }
+
+        // Assign the student to the evaluator
+        evaluator.studentsAssigned.push({ student: studentId });
+        await evaluator.save();
+
+        console.log('Student assigned to evaluator successfully');
+        res.status(200).json({ message: 'Student assigned to evaluator successfully' });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

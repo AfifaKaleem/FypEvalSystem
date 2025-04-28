@@ -1,6 +1,8 @@
 require('dotenv').config();
 
 const express = require('express')
+const fileUpload = require('express-fileupload');
+
 
 const app = express();
 const bodyParser = require('body-parser');
@@ -9,15 +11,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 const db = require('./db');
 const LoginSignup = require('./models/LoginSignup');
-// const Announcement = require('./models/Annoucement');
+// const Announcement = require('./models/Announcement');
 const cors = require('cors');
 const morgan = require('morgan');
 
 const path = require('path');
+const fs = require('fs');
 
-
-// app.set("view engine","ejs")
-// app.set("views".path.resolve(__dirname,"views/ejs"))
 
 
 const allowedOrigins = ['http://localhost:3000', 'http://192.168.18.30:3000'];
@@ -32,15 +32,14 @@ const multiCorsOptions = {
   };
 app.use(cors(multiCorsOptions));
 
+
 // app.use(morgan('tiny'));
 // const Fyp = require('./models/Fyp');
 
 const passport = require('passport');
-//username and password based  designed for authenticaion
+
 //extract username and password from req.body
 const LocalStrategy = require('passport-local').Strategy;
-
-
 
 //done is the callback function that is provided by Passport to signal the completion of an authentication attempt
 
@@ -84,6 +83,8 @@ const AnnouncementRoutes = require('./routes/AnnouncementRoutes');
 const StudentRoutes = require('./routes/StudentRoutes');
 const SupervisorRoutes = require('./routes/SupervisorRoutes');
 
+
+
 // const studentRoutes = require('./routes/StudentRoutes');
 // const supervisorRoutes = require('./routes/SupervisorRoutes');
 
@@ -99,6 +100,17 @@ app.use('/discussion',DiscussionRoutes);
 app.use('/announcement',AnnouncementRoutes);
 app.use('/student',StudentRoutes);
 app.use('/supervisor',SupervisorRoutes);
+
+
+
+const fileRoutes = require('./routes/uploadRoutes'); // adjust the path as needed
+
+// Serve static files (optional)
+app.use(express.static(path.join(__dirname, "public")));
+
+// Routes
+app.use("/file", fileRoutes);
+
 
 
 //load the env file

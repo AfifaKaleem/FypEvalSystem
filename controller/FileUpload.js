@@ -1,32 +1,25 @@
+// Example multer config
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
-const uploadDir = path.join(__dirname, "uploads", "proposals");
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true }); // Create directory if it doesn't exist
-}
-
-
-// Storage configuration
+// Storage config
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadDir); // Save PDFs in 'uploads/proposals' directory
+        cb(null, 'uploads/proposals'); // or wherever you're storing them
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}${path.extname(file.originalname)}`); // Unique filename
+        const ext = path.extname(file.originalname);
+        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+        cb(null, uniqueName);
     }
 });
 
-// File filter: Only accept PDFs
+// File filter (optional, can log file info here for debugging)
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === "application/pdf") {
-        cb(null, true);
-    } else {
-        cb(new Error("Only PDF files are allowed!"), false);
-    }
+    console.log('📎 File received:', file.fieldname);
+    cb(null, true);
 };
 
-const upload = multer({ storage, fileFilter });
+const fileUpload = multer({ storage, fileFilter });
 
-module.exports = upload;
+module.exports = fileUpload;

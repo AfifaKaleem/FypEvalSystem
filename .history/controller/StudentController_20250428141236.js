@@ -725,7 +725,7 @@ module.exports.requestSupervisor = async (req, res) => {
         await supervisor.save();
 
         // Create the file link for response
-        const fileLink = `${req.protocol}://${req.get('host')}/file/view-file/${req.file.filename}`;
+        const fileLink = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
         console.log("Proposal submitted:", student.email, supervisor.email);
 

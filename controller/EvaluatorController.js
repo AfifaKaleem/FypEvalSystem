@@ -70,33 +70,45 @@ module.exports.deleteEvaluator = async (req, res) => {
     }
 };
 
-//assign evaluator to students
+
+
 module.exports.assignEvaluator = async (req, res) => {
     try {
-        const { studentId, evaluatorId } = req.body;
+        const { studentEmailOne, studentEmailTwo, evaluatorEmailOne, evaluatorEmailTwo } = req.body;
 
-        // Find the evaluator and student
-        const evaluator = await Evaluator.findById(evaluatorId);
-        const student = await Student.findById(studentId);
+        // Find the evaluators and students by email
+        const evaluator1 = await Evaluator.findOne({ email: evaluatorEmailOne });
+        const evaluator2 = await Evaluator.findOne({ email: evaluatorEmailTwo });
+        const student1 = await Student.findOne({ email: studentEmailOne });
+        const student2 = await Student.findOne({ email: studentEmailTwo });
 
-        if (!evaluator || !student) {
-            return res.status(404).json({ message: 'Evaluator or Student not found' });
+        if (!evaluator1 || !evaluator2 || !student1 || !student2) {
+            return res.status(404).json({ message: 'One or more Evaluators or Students not found' });
         }
 
-        // Check if the evaluator already has 8 students
-        if (evaluator.students.length >= 8) {
-            return res.status(400).json({ message: 'Evaluator already has 8 students assigned' });
+        // Check if evaluators already have 8 students
+        if (evaluator1.student1.length >= 8 || evaluator2.student2.length >=8  || evaluator2.student1.length >= 8 || evaluator1.student2.length >= 8) {
+            return res.status(400).json({ message: 'One or more evaluators already have 8 students assigned' });
         }
 
-        // Assign the evaluator to the student
-        student.evaluator = evaluatorId;
-        await student.save();
+        // Assign evaluator ObjectId to student
+        student1.evaluator = evaluator1;
+        student2.evaluator = evaluator2;
+        await student1.save();
+        await student2.save();
 
-        // Add the student to the evaluator's list
-        evaluator.students.push(studentId);
-        await evaluator.save();
+        // Add student IDs to evaluator's assigned list
+        evaluator1.students.push(student1);
+        evaluator2.students.push(student2);
 
-        res.status(200).json({ message: 'Evaluator assigned to student successfully' });
+        evaluator1.studentsAssigned.push({ student: student1, status: 'isAssigned' });
+        evaluator2.studentsAssigned.push({ student: student2, status: 'isAssigned' });
+
+        await evaluator1.save();
+        await evaluator2.save();
+
+        res.status(200).json({ message: 'Evaluators assigned to students successfully' });
+
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error });
     }
