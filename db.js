@@ -9,10 +9,11 @@ const mongoURL = process.env.DB_URL||DB_URL;
 mongoose.connect(mongoURL,{
     useNewUrlParser:true,
     useUnifiedTopology:true,
-    tls: true,
-    tlsInsecure: false, // Ensure secure TLS connection
+    // tls: true,
+    // tlsInsecure: false, // Ensure secure TLS connection
 })
 
+// require('dns').resolveSrv('_mongodb._tcp.cluster0.im7ar.mongodb.net', console.log);
 
 //get the default connection 
 //Mongoose maintains a default connection object representing the MongoDb connection
