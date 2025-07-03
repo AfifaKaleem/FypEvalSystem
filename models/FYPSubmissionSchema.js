@@ -32,7 +32,5 @@ const fypFullDocumentSubmissionSchema = new mongoose.Schema({
   }
 });
 
-const FypSubmissionSchema = mongoose.models.FypSubmissionSchema || 
-  mongoose.model('FypSubmissionSchema', fypFullDocumentSubmissionSchema);
 
-module.exports = FypSubmissionSchema;
+module.exports = mongoose.model('FypSubmissionSchema', fypFullDocumentSubmissionSchema);
