@@ -1,34 +1,34 @@
+// models/Evaluator.js
 const mongoose = require('mongoose');
+
 const EvaluatorSchema = new mongoose.Schema({
-    username: {
+  username: { type: String, required: true },
+  email: { type: String, required: true },
+  office: { type: String },
+  domain: [{ type: String }],
+  
+  studentsAssigned: [
+    {
+      studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+      studentName: { type: String },
+      studentEmail: { type: String },
+      status: {
         type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    },
-    office:{
-        type:String,
-        required:true,
-    },
-    studentsAssigned : [
-        {
-            student: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Student',
-                email: mongoose.Schema.Types.String,
-                username : mongoose.Schema.Types.String
-            },
-            status: {
-                type: String,
-                enum: ['isAssigned', 'isNotAssigned'],
-                default: 'isAssigned'
-            }
-        }
-    ]
+        enum: ['isAssigned', 'isNotAssigned'],
+        default: 'isAssigned'
+      }
+    }
+  ],
+
+  gradingHistory: [
+    {
+      studentEmail: { type: String, required: true },
+      phase: { type: String, required: true },         // e.g., "Phase 1"
+      grade: { type: Number, required: true },
+      feedback: { type: String },
+      timestamp: { type: Date, default: Date.now }
+    }
+  ]
 });
 
-const Evaluator = mongoose.model('Evaluator', EvaluatorSchema);
-// Export models
-module.exports = Evaluator;
+module.exports = mongoose.model('Evaluator', EvaluatorSchema);

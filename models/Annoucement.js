@@ -9,16 +9,16 @@ const AnnoucementSchema = new mongoose.Schema({
    },
    DateandTime :{
     type: Date ,
-    required: true
+   //  required: true
    },
    author: {
     type: mongoose.Schema.Types.String,
-    ref: "FypHead",
-    required: true
+    ref: "Admin",
+   //  required: true
    },
    audience: {
     type: [String],
-    enum: ["Evaluator", "Students","Supervisors","Admin"],
+    enum: ["Evaluator", "Student","Supervisor","Admin"],
     required: true
    }
 

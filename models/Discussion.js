@@ -2,13 +2,9 @@ const mongoose = require('mongoose');
 
 // Define the PostSchema for Discussion Forum
 const PostSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-    },
     author: {
         type: String,
-        match: [/(.*@student\.uol\.edu\.pk$|.*@faculty\.uol\.edu\.pk$|.*@admin\.uol\.edu\.pk$)/, 'Invalid author email format'],
+        match: [/(.*@student\.uol\.edu\.pk$|.*@cs\.uol\.edu\.pk$|.*@admin\.cs\.uol\.edu\.pk$)/, 'Invalid author email format'],
         required: true
     },
     content: {
@@ -19,28 +15,38 @@ const PostSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    audience: {
+    type: [String],
+    enum: ["Evaluator", "Student","Supervisor","Admin"],
+    default:["Evaluator", "Student","Supervisor","Admin"]
+   },
     comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment'
+        type: mongoose.Schema.Types.String,
+        ref: 'Reply'
     }]
 });
 
-// Define the CommentSchema for Discussion Forum
-const CommentSchema = new mongoose.Schema({
-    content: {
+// Define the ReplySchema for Discussion Forum
+const ReplySchema = new mongoose.Schema({
+    reply: {
         type: String,
         required: true
     },
     author: {
         type: String,
-        match: [/(.*@student\.uol\.edu\.pk$|.*@faculty\.uol\.edu\.pk$|.*@admin\.uol\.edu\.pk$)/, 'Invalid author email format'],
+        match: [/(.*@student\.uol\.edu\.pk$|.*@cs\.uol\.edu\.pk$|.*@admin\.cs\.uol\.edu\.pk$)/, 'Invalid author email format'],
         required: true
     },
-    post: {
-        type: mongoose.Schema.Types.ObjectId,
+    content: {
+        type: mongoose.Schema.Types.String,
         ref: 'Post',
         required: true
     },
+    audience: {
+    type: [String],
+    enum: ["Evaluator", "Student","Supervisor","Admin"],
+    default: ["Evaluator", "Student","Supervisor","Admin"]
+   },
     createdAt: {
         type: Date,
         default: Date.now
@@ -49,9 +55,9 @@ const CommentSchema = new mongoose.Schema({
 
 // Create models
 const Post = mongoose.model('Post', PostSchema);
-const Comment = mongoose.model('Comment', CommentSchema);
+const Reply = mongoose.model('Reply', ReplySchema);
 
 module.exports = {
     Post,
-    Comment
+    Reply
 };

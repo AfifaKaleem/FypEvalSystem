@@ -12,12 +12,12 @@ const SupervisorSchema = new mongoose.Schema({
     domain: [
         {
             type: String,
-            required: true
+            // required: true
         }
     ],
     office: {
         type: String,
-        required: true
+        // required: true
     },
     position: {
         type: String
@@ -30,8 +30,9 @@ const SupervisorSchema = new mongoose.Schema({
             },
             status: {
                 type: String,
-                enum: ['pending', 'accepted', 'rejected'],
-                default: 'pending'
+                enum: ['pending', 'accepted', 'rejected','rehearsed'],
+                default:'rehearsed'
+                
             },
             projectProposal: { 
                 type: mongoose.Schema.Types.ObjectId, 

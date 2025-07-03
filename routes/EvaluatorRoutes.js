@@ -20,4 +20,15 @@ router.delete('/evaluator/:id', cors(), evaluatorController.deleteEvaluator);
 router.post('/assign-evaluator', cors(), evaluatorController.assignEvaluator);
 
 router.get('/getSpecificEvaluatorAlongStudents/:id', cors(),evaluatorController.getSpecificEvaluatorAlongStudents)
+
+router.get('/getTotalProjectsByEvaluator/:evaluatorEmail',cors(),evaluatorController.getTotalProjectsByEvaluator);
+
+router.get('/phase-one-submissions/:evaluatorEmail/:phaseNumberOne',cors(), evaluatorController.getPhaseOneSubmissionsByEvaluatorEmail);
+router.get('/phase-two-submissions/:evaluatorEmail/:phaseNumberTwo',cors(), evaluatorController.getPhaseTwoSubmissionsByEvaluatorEmail);
+
+
+
+router.get('/phase-one-submissions-grades/:email/:phaseNumber', evaluatorController.getPhaseOneSubmissions);
+
+router.get('/phase-two-submissions-grades/:email/:phaseNumber', evaluatorController.getPhaseTwoSubmissions);
 module.exports = router;

@@ -1,211 +1,144 @@
-const mongoose = require('mongoose');
-const { Post, Comment } = require('./../models/Discussion');
-const { validationResult } = require('express-validator');
+const { Post, Reply } = require('../models/Discussion');
 
-module.exports.createPost = async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const { title, author, content, comments } = req.body;
-
-        // Validate comments if present
-        if (comments && !Array.isArray(comments)) {
-            return res.status(400).json({ error: 'Comments must be an array' });
-        }
-        if (comments && comments.some(comment => !mongoose.Types.ObjectId.isValid(comment))) {
-            return res.status(400).json({ error: 'Invalid comment ID' });
-        }
-        const newPost = new Post({
-            title,
-            author,
-            content,
-            comments: comments || [] // Set to an empty array if no comments
-        });
-
-        const response = await newPost.save();
-        console.log('Post created Successfully');
-        console.log(response);
-        res.status(200).json({ message: "Post created Successfully", response });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+// Create a new post
+const createPost = async (req, res) => {
+  try {
+    const { author, content ,audience} = req.body;
+    const newPost = new Post({ author, content, createdAt: new Date(),audience });
+    const savedPost = await newPost.save();
+    res.status(200).json({ message: 'Post created successfully', post: savedPost });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.getAllPost = async (req, res) => {
-    try {
-        const data = await Post.find().populate('comments');
-        console.log('Post data fetched');
-        res.status(200).json(data);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+// Get all posts
+const getAllPost = async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.getSinglePost = async (req, res) => {
-    try {
-        const post = await Post.findById(req.params.id).populate('author').populate('comments');
-        if (!post) {
-            return res.status(404).send();
-        }
-        res.send(post);
-    } catch (error) {
-        res.status(500).send(error);
+// Delete a post (Admin only)
+const deletePost = async (req, res) => {
+  try {
+    const content = req.params.content;
+    const deletedPost = await Post.findOneAndDelete({content:content});
+
+    if (!deletedPost) return res.status(404).json({ error: 'Post not found' });
+
+    await Reply.deleteMany({ content: content });
+
+    res.status(200).json({ message: 'Post and its replies deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+const createReply = async (req, res) => {
+  try {
+    const { reply, author, content, audience } = req.body;
+
+    // Find the most recent matching post
+    const post = await Post.findOne({ content }).sort({ createdAt: -1 });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
     }
+
+    // Create reply with reference to post ID
+    const newReply = new Reply({
+      reply,
+      author,              // person replying
+      content: post.content, // original post content
+      post: post._id,        // reference to Post
+      audience,
+      createdAt: new Date()
+    });
+
+    const savedReply = await newReply.save();
+
+    res.status(200).json({ message: 'Reply created successfully', reply: savedReply });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.updatePost = async (req, res) => {
-    try {
-        const postId = req.params.id;
-        const updatedPostData = req.body;
 
-        const response = await Post.findByIdAndUpdate(postId, updatedPostData, {
-            new: true, // Return the updated document
-            runValidators: true, // Run mongoose validation
-        });
-
-        if (!response) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        console.log('Post updated successfully');
-        res.status(200).json(response);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+// Get all replies
+const getAllReplies = async (req, res) => {
+  try {
+    const replies = await Reply.find().sort({ createdAt: -1 });
+    res.status(200).json(replies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.deletePost = async (req, res) => {
-    try {
-        const postId = req.params.id;
-
-        const response = await Post.findByIdAndDelete(postId);
-
-        if (!response) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-
-        console.log('Post deleted successfully');
-        res.status(200).json({ message: 'Post deleted successfully' });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+// Get replies for a specific post
+const getRepliesForPost = async (req, res) => {
+  try {
+    const content = req.params.content;
+    const replies = await Reply.find({ content: content }).sort({ createdAt: -1 });
+    res.status(200).json(replies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.createComment = async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        const { content, author, post } = req.body;
+// Delete a reply (Admin only)
 
-        const newComment = new Comment({
-            content,
-            author,
-            post
-        });
+const deleteReply = async (req, res) => {
+  try {
+    const replyText = req.params.reply; // using req.params since you're passing it in the URL
 
-        const response = await newComment.save();
-        console.log('Comment created Successfully');
-        console.log(response);
+    const deletedReply = await Reply.findOneAndDelete({ reply: replyText });
 
-        // Add comment to post
-        await Post.findByIdAndUpdate(post, { $push: { comments: response._id } });
+    if (!deletedReply) return res.status(404).json({ error: 'Reply not found' });
 
-        res.status(200).json({ message: "Comment created Successfully", response });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    res.status(200).json({ message: 'Reply deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.getAllComments = async (req, res) => {
-    try {
-        const data = await Comment.find().populate('post');
-        console.log('Comment data fetched');
-        res.status(200).json(data);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+
+// Get a specific post along with its replies
+const getSpecificPostAlongReplies = async (req, res) => {
+  try {
+    const reply = req.params.reply;
+    const content = req.params.content;
+
+    const post = await Post.find(content).populate('author');
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
     }
+
+    const replies = await Reply.find(reply ).populate('author');
+
+    res.status(200).json({ post, replies });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
-module.exports.updateComment = async (req, res) => {
-    try {
-        const commentId = req.params.id;
-        const updatedCommentData = req.body;
-
-        const response = await Comment.findByIdAndUpdate(commentId, updatedCommentData, {
-            new: true, // Return the updated document
-            runValidators: true, // Run mongoose validation
-        });
-
-        if (!response) {
-            return res.status(404).json({ error: 'Comment not found' });
-        }
-
-        console.log('Comment updated successfully');
-        res.status(200).json(response);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-
-module.exports.deleteComment = async (req, res) => {
-    try {
-        const commentId = req.params.id;
-
-        const response = await Comment.findByIdAndDelete(commentId);
-
-        if (!response) {
-            return res.status(404).json({ error: 'Comment not found' });
-        }
-
-        // Remove comment from post
-        await Post.findByIdAndUpdate(response.post, { $pull: { comments: commentId } });
-
-        console.log('Comment deleted successfully');
-        res.status(200).json({ message: 'Comment deleted successfully' });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-
-//see the post and all the comments from that specific post
-module.exports.seePostcomments = async(req,res)=>{
-    try{
-        const postId = req.params.postId;
-        const comments= req.body;
-        const response = await Post.find(postId,comments).populate('postId comments');
-        if(!response){
-            res.status(404).json({message: "Comment and Post are not found"});
-        }
-        console.log("Single Post of multiple comments are",response);
-        res.status(200).json({message: "Post and Comments Fetched Successfully"});
-    }catch(err){
-        console.log(err);
-        res.status(500).json({error: "Internal Server Error"});
-    }
-}
-
-module.exports.getSpecificPostAlongComments = async (req, res) => {
-    try {
-      const post = await Post.findById(req.params.id).populate('author');
-      if (!post) {
-        return res.status(404).send({ error: 'Post not found' });
-      }
-      const comments = await Comment.find({ post: req.params.id }).populate('author');
-      res.json({ post, comments });
-    } catch (error) {
-      res.status(500).send({ error: 'Internal server error' });
-    }
+module.exports = {
+  createPost,
+  getAllPost,
+  deletePost,
+  createReply,
+  getAllReplies,
+  getRepliesForPost,
+  deleteReply,
+  getSpecificPostAlongReplies,
 };

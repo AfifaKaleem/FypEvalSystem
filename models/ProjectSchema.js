@@ -24,12 +24,17 @@ const projectSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['Pending', 'Accepted', 'Rejected', 'rehearse'],
-        default: 'rehearse'
+       
     },
     submittedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    projectId: { type: String, default: null },
+evaluatorOneEmail: { type: String },
+evaluatorTwoEmail: { type: String },
+evaluators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Evaluator' }]
+
 });
 
 const ProjectProposal = mongoose.model('ProjectProposal', projectSchema);

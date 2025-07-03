@@ -19,7 +19,9 @@ const path = require('path');
 const fs = require('fs');
 
 
-
+// 🔧 Increase payload size limits
+app.use(bodyParser.json({ limit: '1000mb' })); // for JSON
+app.use(bodyParser.urlencoded({ limit: '1000mb', extended: true })); // for form-data
 const allowedOrigins = ['http://localhost:3000', 'http://192.168.18.30:3000'];
 const multiCorsOptions = {
     origin: (origin, callback) => {

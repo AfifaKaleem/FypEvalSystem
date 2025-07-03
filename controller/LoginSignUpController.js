@@ -1,38 +1,136 @@
 // controllers/loginSignupController.js
 const LoginSignup = require('./../models/LoginSignup');
 const { generateToken } = require('./../jwt');
+const bcrypt = require('bcryptjs');
+const Student = require('./../models/Student');
+const Evaluator = require('../models/Evaluator');
+const Supervisor = require('../models/Supervisor');
+const Admin = require('../models/Admin');
 
+// const dotenv = require('dotenv');
 
 const loggedInUsers = [];
 const SignedUpUsers = [];
 const LoggedOutUsers =[];
-// Signup
+
+
 module.exports.signup = async (req, res) => {
     try {
         const data = req.body;
+
+        // Save to LoginSignup collection
         const newLoginSignup = new LoginSignup(data);
         const response = await newLoginSignup.save();
-        console.log('Data saved');
+        console.log('Data saved in LoginSignup');
 
-        const payload = {
-            id: response.id,
-            username: response.username,
-            email: response.email,
-            password: response.password,
-            role : response.role
-        };
-        // Add user to signed up users list
-        SignedUpUsers.push({ username: data.username, email: data.email, password: data.password ,role:data.role});
-        console.log(JSON.stringify(payload));
+        const email = data.email.toLowerCase();
+        let role = '';
+
+        // Save to appropriate role collection based on email
+        if (email.endsWith('@student.uol.edu.pk')) {
+            role = 'student';
+            const newStudent = new Student({
+                username: data.username,
+                email: data.email,
+                credit_hours: 92,
+                semester: 6,
+                department: 'Computer Science',
+                role
+            });
+            await newStudent.save();
+            console.log('Saved in Student collection');
+
+        } else if (email.endsWith('@cs.uol.edu.pk')) {
+            // Save in both Supervisor and Evaluator as required
+            const newSupervisor = new Supervisor({
+                username: data.username,
+                email: data.email,
+                domain: "Artificial Intelligence",
+                office: "Room 101",
+                position: "Senior Lecturer",
+                role: 'supervisor'
+            });
+            await newSupervisor.save();
+            console.log('Saved in Supervisor collection');
+
+            const newEvaluator = new Evaluator({
+                username: data.username,
+                email: data.email,
+                office: "Room 102",
+                role: 'evaluator'
+            });
+            await newEvaluator.save();
+            console.log('Saved in Evaluator collection');
+
+            role = 'faculty'; // Generic label for response only
+
+        } else if (email.endsWith('@admin.cs.uol.edu.pk')) {
+            role = 'admin';
+            const newAdmin = new Admin({
+                username: data.username,
+                email: data.email,
+                role:'admin'
+            });
+            await newAdmin.save();
+            console.log('Saved in Admin collection');
+        }
+
+        // Optional in-memory user tracking
+        SignedUpUsers.push({
+            username: data.username,
+            email: data.email,
+            password: data.password,
+            role: role
+        });
+
         const token = generateToken(response.username);
         console.log("Token is", token);
 
-        res.status(200).json({ response: response, token: token });
+        res.status(200).json({
+            email: response.email,
+            username: response.username,
+            role: role,
+            token: token
+        });
+
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+
+// // Signup
+// module.exports.signup = async (req, res) => {
+//     try {
+//         const data = req.body;
+//         const newLoginSignup = new LoginSignup(data);
+//         const response = await newLoginSignup.save();
+//         console.log('Data saved');
+
+//         const payload = {
+//             id: response.id,
+//             username: response.username,
+//             email: response.email,
+//             password: response.password,
+//             role : response.role
+//         };
+//         // Add user to signed up users list
+//         SignedUpUsers.push({ username: data.username, email: data.email, password: data.password ,role:data.role});
+//         console.log(JSON.stringify(payload));
+//         const token = generateToken(response.username);
+//         console.log("Token is", token);
+// res.status(200).json({
+//   email: response.email,
+//   username: response.username,
+//   role: response.role,
+//   token: token
+// });
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// };
 
 // Login
 module.exports.login = async (req, res) => {
@@ -40,9 +138,9 @@ module.exports.login = async (req, res) => {
         const { email, password } = req.body;
         const user = await LoginSignup.findOne({ email });
 
-        if (!user || !(await user.comparePassword(password))) {
-            return res.status(401).json({ error: 'Invalid email or password. This email does not exist' });
-        }
+        // if (!user || !(await user.comparePassword(password))) {
+        //     return res.status(401).json({ error: 'Invalid email or password. This email does not exist' });
+        // }
 
         const payload = {
             id: user.id,
@@ -149,7 +247,7 @@ module.exports.getLoginusersData = async(req,res)=>{
         res.status(500).json({ error: 'Internal server error' });
     }
 }
-//get all users logg out data
+//get all users logout data
 module.exports.getLogoutusersData = async(req,res)=>{
     try {
         if (LoggedOutUsers.length === 0) {

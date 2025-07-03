@@ -24,7 +24,9 @@ const LoginSignUpSchema = new mongoose.Schema({
     password: {
         type:String,
         required : true, 
-        unique: true
+        unique: true,
+        // minlength: 8,
+        // maxlength:12
     },
 });
 
