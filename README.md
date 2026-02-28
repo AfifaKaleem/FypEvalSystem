@@ -128,16 +128,3 @@ POST /api/admin/announcement –→ Post announcement
 
 Contributions are welcome! If you'd like to improve this project, fork the repo and create a pull request.always welcome! If you'd like to improve this project:
 
-🤝 Contributing
-
-Contributions are welcome! If you'd like to improve this project, fork the repo and create a pull request.
-
-Fork the repository
-
-Create a new branch (feature-branch)
-
-Commit your changes
-
-Push the branch
-
-Create a Pull Request
